@@ -563,7 +563,7 @@
       updateCharCount();
     }
 
-    function closeBioModal() { var gs=document.getElementById('gamertagStatus'); if(gs) gs.innerHTML='';
+    function closeBioModal() { var gs=document.getElementById('gamertagStatus'); if(gs) gs.textContent='';
       document.getElementById('bioModal').classList.remove('active');
     }
 
@@ -650,7 +650,7 @@
         document.getElementById('profileGamertag').textContent = '@' + saved.gamertag.replace('@', '');
       }
       if (saved.bio) {
-        document.getElementById('profileBio').innerHTML = saved.bio;
+        document.getElementById('profileBio').textContent = saved.bio || '';
       }
       if (avatar) {
         var img = document.getElementById('avatarImage');
@@ -689,7 +689,7 @@
         
         document.getElementById('profileDisplayName').textContent = displayName;
         document.getElementById('profileGamertag').textContent = gamertag || '@0000';
-        if (bio) document.getElementById('profileBio').innerHTML = bio;
+        if (bio) document.getElementById('profileBio').textContent = bio;
 
         // Format join date
         var created = new Date(session.user.created_at);
