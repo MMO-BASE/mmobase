@@ -1,0 +1,2199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard Demo - MMOBASE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @media (max-height: 860px) { body { zoom: 0.84 !important; } }
+    @media (max-height: 700px) { body { zoom: 0.78 !important; } }
+    :root{--bg:#0a0e17;--panel:rgba(255,255,255,0.03);--border:rgba(255,255,255,0.06);--bh:rgba(0,180,216,0.3);--t1:#fff;--t2:#8892a6;--t3:#555d6e;--heading:#fff;--acc:#00b4d8;--adim:rgba(0,180,216,0.15);--g:#4ade80;--r:#f87171;--a:#f4a020;--m:'JetBrains Mono',monospace}
+    *{margin:0;padding:0;box-sizing:border-box;font-family:'Inter',sans-serif}
+    body{background:var(--bg);color:var(--t1);overflow-x:hidden}
+    header{position:fixed;top:0;width:100%;padding:20px 48px;display:flex;justify-content:space-between;align-items:center;z-index:9999;background:rgba(10,14,23,0.98);border-bottom:1px solid rgba(255,255,255,0.05)}
+    .logo{font-weight:700;font-size:20px;letter-spacing:0.5px}
+    nav{display:flex;align-items:center}
+    nav a{color:#cccccc;text-decoration:none;margin-left:28px;font-size:15px;transition:color 0.2s ease}
+    nav a:hover{color:white}
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    .nav-cta{padding:10px 18px;background:white;color:black;border-radius:10px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block}
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    .mode-toggle{background:0;border:0;padding:0;cursor:pointer;margin-left:12px;color:var(--t2)}
+    .mode-toggle:hover{color:#fff}
+    .mode-toggle svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:2;vertical-align:middle}
+    .user-menu,.games-menu{position:relative;display:inline-block}
+    .games-toggle{color:var(--t2);text-decoration:none;margin-left:24px;font-size:14px;cursor:pointer;transition:color 0.2s}
+    .games-toggle:hover{color:#fff}
+    .games-dropdown{display:none;position:absolute;top:calc(100% + 8px);left:0;min-width:160px;animation:dd 0.2s ease;z-index:1000}
+    .games-dropdown.show{display:block}
+    .games-dropdown a{display:block;padding:8px 30px;color:var(--t2);text-decoration:none;font-size:13px;transition:color 0.2s;margin:0}
+    .games-dropdown a:hover{color:#fff}
+    .user-dropdown{display:none;position:absolute;top:calc(100% + 8px);left:0;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.2);min-width:160px;overflow:hidden;animation:dd 0.2s ease;z-index:1000}
+    .user-dropdown.show{display:block}
+    .user-dropdown a{display:block;padding:10px 16px;color:#1a1a1a;text-decoration:none;font-size:13px;transition:background 0.2s;margin:0}
+    .user-dropdown a:hover{background:rgba(0,180,216,0.08)}
+    .user-dropdown hr{margin:4px 0;border:0;border-top:1px solid rgba(0,0,0,0.06)}
+    @keyframes dd{from{opacity:0;transform:translateY(-8px)}to{opacity:1;transform:translateY(0)}}
+    main{padding:72px 40px 40px;max-width:1400px;margin:0 auto;position:relative;z-index:1}
+    .page-bar{display:flex;justify-content:space-between;align-items:center;padding:16px 0 0;margin-bottom:8px;position:relative;z-index:1}
+    .page-bar h1{font-size:22px;font-weight:700;display:flex;align-items:center;gap:10px}
+    .game-tag{font-size:10px;font-weight:600;padding:3px 8px;background:var(--adim);color:var(--acc);border-radius:5px;text-transform:uppercase;letter-spacing:0.8px}
+    .page-bar-buttons{display:flex;gap:10px;align-items:center}
+    .connect-btn{padding:8px 20px;background:var(--acc);color:#000;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;text-decoration:none}
+    .connect-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,180,216,0.3)}
+    .char-switcher{position:relative;display:inline-block;margin-bottom:-1px}
+    .char-switcher-btn{padding:8px 16px;background:var(--acc);color:#000;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;display:flex;align-items:center;gap:6px}
+    .char-switcher-btn:hover{transform:translateY(-1px);box-shadow:0 6px 20px rgba(0,180,216,0.3)}
+    .char-switcher-btn svg{width:10px;height:10px;fill:currentColor}
+    .char-dropdown{display:none;position:absolute;top:calc(100% + 6px);right:0;background:#fff;border-radius:10px;box-shadow:0 8px 24px rgba(0,0,0,0.2);min-width:200px;overflow:hidden;z-index:1000;animation:dd 0.2s ease}
+    .char-dropdown.show{display:block}
+    .char-dropdown-label{font-size:10px;font-weight:600;color:#999;text-transform:uppercase;letter-spacing:0.8px;padding:10px 14px 6px}
+    .char-item{display:flex;align-items:center;gap:10px;padding:10px 14px;color:#1a1a1a;text-decoration:none;font-size:13px;cursor:pointer;transition:background 0.15s}
+    .char-item:hover{background:rgba(0,180,216,0.08)}
+    .char-item.active{background:rgba(0,180,216,0.12);font-weight:600}
+    .char-item-dot{width:8px;height:8px;border-radius:50%;background:#ccc;flex-shrink:0}
+    .char-item.active .char-item-dot{background:var(--g)}
+    .char-dropdown hr{margin:4px 0;border:0;border-top:1px solid rgba(0,0,0,0.06)}
+    .char-connect-new{display:flex;align-items:center;gap:8px;padding:10px 14px;color:var(--acc);text-decoration:none;font-size:13px;font-weight:600;cursor:pointer;transition:background 0.15s}
+    .char-connect-new:hover{background:rgba(0,180,216,0.08)}
+    .char-connect-new svg{width:14px;height:14px;stroke:currentColor;fill:none;stroke-width:2.5}
+    .market-btn{padding:8px 16px;background:transparent;color:var(--acc);border:1px solid var(--acc)}
+    .market-btn:hover{background:var(--adim);box-shadow:0 6px 20px rgba(0,180,216,0.15)}
+    .tab-nav{display:flex;gap:0;border-bottom:1px solid var(--border);margin-bottom:24px;align-items:center}
+    .tab-nav-spacer{flex:1}
+    .tab-btn{padding:12px 24px;background:0;border:0;color:var(--t3);font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;position:relative;letter-spacing:0.3px}
+    .tab-btn:hover{color:var(--t2)}
+    .tab-btn.active{color:var(--acc)}
+    .tab-btn.active::after{content:'';position:absolute;bottom:-1px;left:0;width:100%;height:2px;background:var(--acc);border-radius:1px}
+    .tab-content{display:none}
+    .tab-content.active{display:block;animation:fi 0.3s ease}
+    .overview-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px}
+    .panel{background:var(--panel);border:1px solid var(--border);border-radius:12px;padding:20px;transition:border-color 0.2s}
+    .panel:hover{border-color:var(--bh)}
+    .panel-title{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:1.2px;margin-bottom:14px}
+    .char-header{display:flex;gap:14px;align-items:center;margin-bottom:16px}
+    .char-portrait{width:56px;height:56px;background:linear-gradient(135deg,rgba(0,180,216,0.15),rgba(0,180,216,0.05));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:22px;color:var(--acc);border:1px solid var(--border);flex-shrink:0}
+    .char-name{font-size:16px;font-weight:700;margin-bottom:2px}
+    .char-corp{font-size:12px;color:var(--t2)}
+    .char-alliance{font-size:11px;color:var(--t3)}
+    .stat-row{display:flex;justify-content:space-between;padding:8px 0;border-top:1px solid var(--border)}
+    .stat-label{font-size:12px;color:var(--t3)}
+    .stat-val{font-family:var(--m);font-size:13px;font-weight:500}
+    .stat-val.isk{color:var(--g)}.stat-val.sp{color:var(--acc)}
+    .training-active{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
+    .training-skill-name{font-size:15px;font-weight:700}
+    .training-level{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;background:rgba(74,222,128,0.15);color:var(--g);margin-left:6px}
+    .training-time{font-family:var(--m);font-size:13px;color:var(--g)}
+    .training-bar{width:100%;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden;margin-bottom:16px}
+    .training-bar-fill{height:100%;border-radius:3px;background:linear-gradient(90deg,var(--acc),var(--g))}
+    .queue-next{font-size:11px;color:var(--t3);margin-bottom:4px;text-transform:uppercase;letter-spacing:0.8px}
+    .queue-item{display:flex;justify-content:space-between;padding:6px 0;font-size:13px;border-top:1px solid var(--border)}
+    .queue-item-name{color:var(--t2)}
+    .queue-item-level{font-size:10px;padding:1px 6px;border-radius:3px;background:var(--adim);color:var(--acc);margin-left:6px}
+    .queue-item-time{font-family:var(--m);font-size:12px;color:var(--t3)}
+    .wallet-balance{font-family:var(--m);font-size:28px;font-weight:700;color:var(--g);margin-bottom:4px}
+    .wallet-change{font-size:12px;color:var(--g);margin-bottom:16px}
+    .tx-item{display:flex;justify-content:space-between;align-items:center;padding:7px 0;border-top:1px solid var(--border)}
+    .tx-desc{font-size:12px;color:var(--t2)}.tx-time{font-size:10px;color:var(--t3);margin-top:1px}
+    .tx-amount{font-family:var(--m);font-size:12px;font-weight:500}
+    .tx-amount.positive{color:var(--g)}.tx-amount.negative{color:var(--r)}
+    .assets-total{font-family:var(--m);font-size:28px;font-weight:700;color:var(--acc);margin-bottom:14px}
+    .asset-loc{margin-bottom:10px}
+    .asset-loc-name{font-size:12px;font-weight:600;color:var(--acc);margin-bottom:4px;display:flex;align-items:center;gap:5px}
+    .asset-loc-name::before{content:'';width:5px;height:5px;border-radius:50%;background:var(--acc)}
+    .asset-row{display:flex;justify-content:space-between;padding:4px 0 4px 10px;font-size:12px;color:var(--t2);border-left:1px solid var(--border)}
+    .asset-val{font-family:var(--m);font-size:11px;color:var(--t3)}
+    .ship-item{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+    .ship-item:last-child{border-bottom:0}
+    .ship-name{font-size:13px;font-weight:600}.ship-loc{font-size:10px;color:var(--t3);margin-top:1px}
+    .ship-tag{font-size:10px;font-weight:600;padding:2px 7px;border-radius:4px;background:rgba(255,255,255,0.05);color:var(--t2)}
+    .ship-tag.carrier{background:rgba(0,180,216,0.12);color:var(--acc)}
+    .ship-tag.marauder{background:rgba(248,113,113,0.12);color:var(--r)}
+    .wealth-row{display:flex;gap:24px;margin-bottom:14px}
+    .wealth-stat-label{font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.8px}
+    .wealth-stat-value{font-family:var(--m);font-size:20px;font-weight:500;color:var(--g)}
+    .wealth-mini-chart{height:80px;display:flex;align-items:flex-end;gap:3px;padding:8px 0}
+    .wealth-bar{flex:1;background:linear-gradient(180deg,var(--acc),rgba(0,180,216,0.2));border-radius:2px 2px 0 0;min-height:4px}
+    .wealth-bar:hover{background:linear-gradient(180deg,#00d4ff,rgba(0,180,216,0.4))}
+    .market-row{display:flex;justify-content:space-between;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+    .market-row:last-child{border-bottom:0}
+    .market-name{font-size:13px;font-weight:600}
+    .market-price{font-family:var(--m);font-size:13px;color:var(--acc)}
+    .market-chg{font-size:10px;font-weight:600}
+    .market-chg.up{color:var(--g)}.market-chg.down{color:var(--r)}
+    .coming-soon{text-align:center;padding:120px 0;color:var(--t3)}
+    .coming-soon h2{font-size:24px;margin-bottom:8px;color:var(--t2)}
+    .coming-soon p{font-size:14px}
+    .train-row{display:grid;grid-template-columns:1fr 120px 70px 105px 145px;gap:0;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+    .train-row:last-child{border-bottom:0}
+    .train-name{font-size:13px;font-weight:600;color:var(--t2)}
+    .train-row.active .train-name{color:var(--t1)}
+    .train-prog{width:100%;height:4px;background:rgba(255,255,255,0.06);border-radius:2px;overflow:hidden}
+    .train-prog-fill{height:100%;border-radius:2px;background:var(--acc)}
+    .train-prog-fill.active{background:var(--g)}
+    .train-lvl{text-align:center}
+    .train-skill-remaining{font-family:var(--m);font-size:12px;color:var(--t2);text-align:right}
+    .train-row.active .train-skill-remaining{color:var(--g)}
+    .train-time{font-family:var(--m);font-size:12px;color:var(--t2);text-align:right}
+    .train-time.active{color:var(--g)}
+    .sp-cat{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px solid var(--border)}
+    .sp-cat:last-child{border-bottom:0}
+    .sp-cat-name{font-size:13px;color:var(--t2)}
+    .completed-item{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+    .completed-item:last-child{border-bottom:0}
+    .completed-name{font-size:13px;font-weight:600;color:var(--t2)}
+    .completed-date{font-family:var(--m);font-size:11px;color:var(--t3)}
+    body.light-mode .train-name{color:#555}
+    body.light-mode .train-row.active .train-name{color:#1a1a1a}
+    body.light-mode .train-row{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .train-prog{background:rgba(0,0,0,0.06)}
+    body.light-mode .sp-cat{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .sp-cat-name{color:#555}
+    body.light-mode .completed-item{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .completed-name{color:#555}
+    body.light-mode .completed-date{color:#999}
+    .fin-bar-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--border)}
+    .fin-bar-row:last-child{border-bottom:0}
+    .fin-bar-label{font-size:12px;color:var(--t2);min-width:90px}
+    .fin-bar{flex:1;height:6px;background:rgba(255,255,255,0.06);border-radius:3px;overflow:hidden}
+    .fin-bar-fill{height:100%;border-radius:3px}
+    .fin-bar-fill.income{background:var(--g)}
+    .fin-bar-fill.expense{background:var(--r)}
+    .fin-bar-val{font-family:var(--m);font-size:12px;min-width:70px;text-align:right}
+    .fin-bar-val.isk{color:var(--g)}
+    .fin-tx{display:grid;grid-template-columns:1fr 120px 120px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+    .fin-tx:last-child{border-bottom:0}
+    .fin-tx-desc{font-size:13px;color:var(--t2)}
+    .fin-tx-time{display:block;font-size:10px;color:var(--t3);margin-top:1px}
+    .fin-tx-amt{font-family:var(--m);font-size:12px;font-weight:500;text-align:right}
+    .fin-tx-amt.positive{color:var(--g)}
+    .fin-tx-amt.negative{color:var(--r)}
+    .fin-tx-bal{font-family:var(--m);font-size:11px;color:var(--t3);text-align:right}
+    body.light-mode .fin-bar-row{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .fin-bar-label{color:#555}
+    body.light-mode .fin-bar{background:rgba(0,0,0,0.06)}
+    body.light-mode .fin-tx{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .fin-tx-desc{color:#555}
+    body.light-mode .fin-tx-time{color:#999}
+    body.light-mode .fin-tx-bal{color:#999}
+    .asset-line{display:grid;grid-template-columns:1fr 80px 100px;align-items:center;padding:7px 0;border-bottom:1px solid var(--border)}
+    .asset-line:last-child{border-bottom:0}
+    .asset-line-name{font-size:13px;color:var(--t2)}
+    .asset-line-qty{font-family:var(--m);font-size:12px;color:var(--t3);text-align:center}
+    .asset-line-val{font-family:var(--m);font-size:12px;color:var(--acc);text-align:right}
+    .asset-line.dim .asset-line-name{color:var(--t3);font-style:italic}
+    .asset-line.dim .asset-line-val{color:var(--t3)}
+    .hv-item{display:flex;align-items:center;gap:10px;padding:7px 0;border-bottom:1px solid var(--border)}
+    .hv-item:last-child{border-bottom:0}
+    .hv-rank{font-family:var(--m);font-size:11px;color:var(--t3);width:20px;text-align:center}
+    .hv-name{flex:1;font-size:13px;color:var(--t2)}
+    .hv-val{font-family:var(--m);font-size:12px;color:var(--acc)}
+    .asset-change{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+    .asset-change:last-child{border-bottom:0}
+    .asset-change-icon{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-size:14px;font-weight:700;flex-shrink:0}
+    .asset-change-icon.add{background:rgba(74,222,128,0.12);color:var(--g)}
+    .asset-change-icon.rem{background:rgba(248,113,113,0.12);color:var(--r)}
+    .asset-change-desc{flex:1;font-size:13px;color:var(--t2)}
+    .asset-change-val{font-family:var(--m);font-size:12px;min-width:70px;text-align:right}
+    .asset-change-val.isk{color:var(--g)}
+    body.light-mode .asset-line{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .asset-line-name{color:#555}
+    body.light-mode .asset-line-qty{color:#999}
+    body.light-mode .asset-line.dim .asset-line-name{color:#999}
+    body.light-mode .asset-line.dim .asset-line-val{color:#999}
+    body.light-mode .hv-item{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .hv-name{color:#555}
+    body.light-mode .hv-rank{color:#999}
+    body.light-mode .asset-change{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .asset-change-desc{color:#555}
+    .mkt-watch{display:grid;grid-template-columns:1fr 100px 100px 80px 80px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+    .mkt-watch:last-child{border-bottom:0}
+    .mkt-watch-name{font-size:13px;font-weight:600;color:var(--t2)}
+    .mkt-watch-buy{font-family:var(--m);font-size:12px;color:var(--g);text-align:right}
+    .mkt-watch-sell{font-family:var(--m);font-size:12px;color:var(--acc);text-align:right}
+    .mkt-watch-spread{font-family:var(--m);font-size:11px;color:var(--t3);text-align:right}
+    .mkt-watch-chg{font-family:var(--m);font-size:11px;font-weight:600;text-align:right}
+    .mkt-watch-chg.up{color:var(--g)}
+    .mkt-watch-chg.down{color:var(--r)}
+    .mover-item{display:flex;justify-content:space-between;align-items:center;padding:6px 0;border-bottom:1px solid var(--border)}
+    .mover-item:last-child{border-bottom:0}
+    .mover-name{font-size:13px;color:var(--t2)}
+    .mover-chg{font-family:var(--m);font-size:12px;font-weight:600}
+    .mover-chg.up{color:var(--g)}
+    .mover-chg.down{color:var(--r)}
+    .order-row{display:grid;grid-template-columns:1fr 60px 100px 100px 80px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+    .order-row:last-child{border-bottom:0}
+    .order-name{font-size:13px;color:var(--t2)}
+    .order-qty{font-family:var(--m);font-size:12px;color:var(--t3);text-align:center}
+    .order-price{font-family:var(--m);font-size:12px;color:var(--acc);text-align:right}
+    .order-total{font-family:var(--m);font-size:12px;color:var(--t2);text-align:right}
+    .order-status{font-size:10px;font-weight:600;text-align:right;text-transform:uppercase;letter-spacing:0.5px}
+    .order-status.active{color:var(--g)}
+    .order-row-sm{display:flex;justify-content:space-between;align-items:center;padding:10px 0;border-bottom:1px solid var(--border);gap:8px;flex-wrap:wrap}
+    .order-row-sm:last-child{border-bottom:0}
+    .order-qty-sm{font-family:var(--m);font-size:12px;color:var(--t3)}
+    .order-price-sm{font-family:var(--m);font-size:12px;color:var(--acc)}
+    .trade-row{display:grid;grid-template-columns:80px 1fr 60px 100px 100px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+    .trade-row:last-child{border-bottom:0}
+    .trade-type{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:0.5px}
+    .trade-type.buy{color:var(--g)}
+    .trade-type.sell{color:var(--acc)}
+    .trade-item{font-size:13px;color:var(--t2)}
+    .trade-qty{font-family:var(--m);font-size:12px;color:var(--t3);text-align:center}
+    .trade-price{font-family:var(--m);font-size:12px;color:var(--acc);text-align:right}
+    .trade-when{font-family:var(--m);font-size:11px;color:var(--t3);text-align:right}
+    body.light-mode .mkt-watch{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .mkt-watch-name{color:#555}
+    body.light-mode .mover-item{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .mover-name{color:#555}
+    body.light-mode .order-row{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .order-row-sm{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .order-name{color:#555}
+    body.light-mode .trade-row{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .trade-item{color:#555}
+    .fleet-row{display:grid;grid-template-columns:1fr 100px 140px 80px 80px;align-items:center;padding:10px 0;border-bottom:1px solid var(--border)}
+    .fleet-row:last-child{border-bottom:0}
+    .fleet-ship{font-size:14px;font-weight:600;color:var(--t1)}
+    .fleet-loc{font-size:12px;color:var(--t3)}
+    .fleet-val{font-family:var(--m);font-size:12px;color:var(--acc);text-align:right}
+    .fleet-ins{font-size:10px;font-weight:600;text-align:center;text-transform:uppercase;letter-spacing:0.5px}
+    .fleet-ins.platinum{color:var(--acc)}
+    .fleet-ins.gold{color:var(--a)}
+    .fleet-status{font-size:10px;font-weight:600;text-align:right;text-transform:uppercase;letter-spacing:0.5px}
+    .fleet-status.docked{color:var(--g)}
+    .fleet-status.space{color:var(--a)}
+    .fit-section{font-size:10px;font-weight:600;color:var(--t3);text-transform:uppercase;letter-spacing:1px;padding-bottom:6px;border-bottom:1px solid var(--border);margin-bottom:4px}
+    .fit-mod{display:flex;justify-content:space-between;padding:5px 0;font-size:13px}
+    .fit-mod-name{color:var(--t2)}
+    .fit-mod-qty{font-family:var(--m);font-size:11px;color:var(--t3)}
+    .loss-item{display:grid;grid-template-columns:1fr 80px 80px 90px;align-items:center;padding:8px 0;border-bottom:1px solid var(--border)}
+    .loss-item:last-child{border-bottom:0}
+    .loss-ship{font-size:13px;font-weight:600;color:var(--t2)}
+    .loss-where{font-size:11px;color:var(--t3)}
+    .loss-val{font-family:var(--m);font-size:12px;text-align:right}
+    .loss-when{font-family:var(--m);font-size:11px;color:var(--t3);text-align:right}
+    .ins-item{display:flex;justify-content:space-between;align-items:center;padding:9px 0;border-bottom:1px solid var(--border)}
+    .ins-item:last-child{border-bottom:0}
+    .ins-ship{font-size:13px;font-weight:600;color:var(--t2)}
+    .ins-exp{font-family:var(--m);font-size:11px;color:var(--t3)}
+    body.light-mode .fleet-row{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .fleet-ship{color:#1a1a1a}
+    body.light-mode .fleet-loc{color:#999}
+    body.light-mode .fit-section{color:#999;border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .fit-mod-name{color:#555}
+    body.light-mode .fit-mod-qty{color:#999}
+    body.light-mode .loss-item{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .loss-ship{color:#555}
+    body.light-mode .loss-where{color:#999}
+    body.light-mode .ins-item{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .ins-ship{color:#555}
+    @keyframes fi{from{opacity:0}to{opacity:1}}
+    @keyframes su{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+    .overview-grid .panel{animation:su 0.4s ease forwards;opacity:0}
+    .overview-grid .panel:nth-child(1){animation-delay:.03s}
+    .overview-grid .panel:nth-child(2){animation-delay:.06s}
+    .overview-grid .panel:nth-child(3){animation-delay:.09s}
+    .overview-grid .panel:nth-child(4){animation-delay:.12s}
+    .overview-grid .panel:nth-child(5){animation-delay:.15s}
+    .overview-grid .panel:nth-child(6){animation-delay:.18s}
+    .overview-grid .panel:nth-child(7){animation-delay:.21s}
+    .overview-grid .panel:nth-child(8){animation-delay:.24s}
+    .overview-grid .panel:nth-child(9){animation-delay:.27s}
+    
+    /* LIGHT MODE */
+    body.light-mode{--t1:#1a1a1a;--t2:#555;--t3:#888;--heading:#1a1a1a;background:#f0f2f5;color:#1a1a1a}
+    body.light-mode header{background:rgba(240,242,245,0.95);border-bottom-color:rgba(0,0,0,0.08)}
+    body.light-mode nav a,body.light-mode .games-toggle{color:#666}
+    body.light-mode nav a:hover,body.light-mode .games-toggle:hover{color:#1a1a1a}
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    body.light-mode .games-dropdown a{color:#666}
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    body.light-mode .games-dropdown a:hover{color:#1a1a1a}
+    body.light-mode .logo{color:#1a1a1a}
+    body.light-mode .nav-cta{background:#1a1a1a;color:#fff}
+    body.light-mode .mode-toggle{color:#666}
+    body.light-mode .mode-toggle:hover{color:#1a1a1a}
+    body.light-mode .page-bar h1{color:#1a1a1a}
+    body.light-mode .tab-nav{border-bottom-color:rgba(0,0,0,0.08)}
+    body.light-mode .tab-btn{color:#999}
+    body.light-mode .tab-btn:hover{color:#666}
+    body.light-mode .tab-btn.active{color:var(--acc)}
+    body.light-mode .panel{background:rgba(255,255,255,0.8);border-color:rgba(0,0,0,0.06)}
+    body.light-mode .panel:hover{border-color:rgba(0,180,216,0.25)}
+    body.light-mode .panel-title{color:#999}
+    body.light-mode .char-name{color:#1a1a1a}
+    body.light-mode .char-corp{color:#555}
+    body.light-mode .char-alliance{color:#888}
+    body.light-mode .char-portrait{background:linear-gradient(135deg,rgba(0,180,216,0.1),rgba(0,180,216,0.03));border-color:rgba(0,0,0,0.06)}
+    body.light-mode .stat-row{border-top-color:rgba(0,0,0,0.06)}
+    body.light-mode .stat-label{color:#888}
+    body.light-mode .stat-val{color:#1a1a1a}
+    body.light-mode .training-skill-name{color:#1a1a1a}
+    body.light-mode .training-bar{background:rgba(0,0,0,0.06)}
+    body.light-mode .queue-item{border-top-color:rgba(0,0,0,0.06)}
+    body.light-mode .queue-item-name{color:#555}
+    body.light-mode .queue-item-time{color:#999}
+    body.light-mode .tx-item{border-top-color:rgba(0,0,0,0.06)}
+    body.light-mode .tx-desc{color:#555}
+    body.light-mode .tx-time{color:#999}
+    body.light-mode .asset-loc-name{color:var(--acc)}
+    body.light-mode .asset-row{color:#555;border-left-color:rgba(0,0,0,0.06)}
+    body.light-mode .asset-val{color:#999}
+    body.light-mode .ship-item{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .ship-name{color:#1a1a1a}
+    body.light-mode .ship-loc{color:#999}
+    body.light-mode .wealth-mini-chart .wealth-bar{background:linear-gradient(180deg,var(--acc),rgba(0,180,216,0.15))}
+    body.light-mode .market-row{border-bottom-color:rgba(0,0,0,0.06)}
+    body.light-mode .market-name{color:#1a1a1a}
+    body.light-mode .connect-btn{background:var(--acc);color:#000}
+    body.light-mode .market-btn{background:transparent;color:var(--acc);border-color:var(--acc)}
+    body.light-mode .coming-soon{color:#999}
+    body.light-mode .coming-soon h2{color:#555}
+        @media(max-width:1100px){.overview-grid{grid-template-columns:1fr 1fr}}
+    @media(max-width:700px){header{padding:14px 20px}main{padding:72px 16px 24px}.overview-grid{grid-template-columns:1fr}.page-bar{flex-direction:column;gap:12px;align-items:flex-start}.tab-btn{padding:10px 14px;font-size:12px}}
+
+    .asset-chart-tooltip{
+      position:fixed;
+      display:none;
+      pointer-events:none;
+      z-index:100000;
+      background:rgba(10,14,23,0.96);
+      border:1px solid rgba(0,180,216,0.28);
+      border-radius:10px;
+      padding:9px 11px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.35);
+      backdrop-filter:blur(10px);
+      min-width:132px;
+      transform:translate(12px,-50%);
+    }
+    .asset-chart-tooltip-value{
+      font-family:var(--m);
+      font-size:13px;
+      font-weight:700;
+      color:var(--acc);
+      line-height:1.2;
+      white-space:nowrap;
+    }
+    .asset-chart-tooltip-date{
+      font-size:10px;
+      color:var(--t3);
+      margin-top:4px;
+      text-transform:uppercase;
+      letter-spacing:0.7px;
+      white-space:nowrap;
+    }
+    body.light-mode .asset-chart-tooltip{
+      background:rgba(255,255,255,0.96);
+      border-color:rgba(0,180,216,0.22);
+      box-shadow:0 10px 30px rgba(0,0,0,0.12);
+    }
+
+
+    .asset-chart-tooltip{
+      position:fixed;
+      display:none;
+      pointer-events:none;
+      z-index:100000;
+      background:rgba(10,14,23,0.96);
+      border:1px solid rgba(0,180,216,0.28);
+      border-radius:10px;
+      padding:9px 11px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.35);
+      backdrop-filter:blur(10px);
+      min-width:132px;
+      transform:translate(12px,-50%);
+    }
+    .asset-chart-tooltip-value{
+      font-family:var(--m);
+      font-size:13px;
+      font-weight:700;
+      color:var(--acc);
+      line-height:1.2;
+      white-space:nowrap;
+    }
+    .asset-chart-tooltip-date{
+      font-size:10px;
+      color:var(--t3);
+      margin-top:4px;
+      text-transform:uppercase;
+      letter-spacing:0.7px;
+      white-space:nowrap;
+    }
+    .asset-chart-point,.asset-chart-hit{cursor:pointer;pointer-events:all}
+    .asset-chart-hit{fill:transparent;stroke:transparent}
+    body.light-mode .asset-chart-tooltip{
+      background:rgba(255,255,255,0.96);
+      border-color:rgba(0,180,216,0.22);
+      box-shadow:0 10px 30px rgba(0,0,0,0.12);
+    }
+
+
+    .asset-chart-tooltip{
+      position:fixed !important;
+      display:none;
+      pointer-events:none;
+      z-index:2147483647 !important;
+      background:rgba(10,14,23,0.98);
+      border:1px solid rgba(0,180,216,0.38);
+      border-radius:10px;
+      padding:9px 12px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.40);
+      backdrop-filter:blur(10px);
+      min-width:132px;
+    }
+    .asset-chart-tooltip-value{
+      font-family:var(--m);
+      font-size:13px;
+      font-weight:700;
+      color:var(--acc);
+      line-height:1.2;
+      white-space:nowrap;
+    }
+    .asset-chart-tooltip-date{
+      font-size:10px;
+      color:var(--t3);
+      margin-top:4px;
+      text-transform:uppercase;
+      letter-spacing:0.7px;
+      white-space:nowrap;
+    }
+    .asset-chart-point{cursor:pointer;pointer-events:all}
+    .asset-chart-hit{cursor:pointer;pointer-events:all;fill:transparent;stroke:transparent}
+    body.light-mode .asset-chart-tooltip{
+      background:rgba(255,255,255,0.98);
+      border-color:rgba(0,180,216,0.28);
+      box-shadow:0 10px 30px rgba(0,0,0,0.16);
+    }
+
+
+    /* ASSET VALUE GRAPH TOOLTIP */
+    .asset-chart-tooltip{
+      position:fixed !important;
+      display:none;
+      pointer-events:none;
+      z-index:2147483647 !important;
+      background:rgba(10,14,23,0.98);
+      border:1px solid rgba(0,180,216,0.38);
+      border-radius:10px;
+      padding:9px 12px;
+      box-shadow:0 10px 30px rgba(0,0,0,0.40);
+      backdrop-filter:blur(10px);
+      min-width:132px;
+    }
+    .asset-chart-tooltip-value{
+      font-family:var(--m);
+      font-size:13px;
+      font-weight:700;
+      color:var(--acc);
+      line-height:1.2;
+      white-space:nowrap;
+    }
+    .asset-chart-tooltip-date{
+      font-size:10px;
+      color:var(--t3);
+      margin-top:4px;
+      text-transform:uppercase;
+      letter-spacing:0.7px;
+      white-space:nowrap;
+    }
+    .asset-chart-point{
+      cursor:pointer;
+      pointer-events:all;
+    }
+    .asset-chart-hit{
+      cursor:pointer;
+      pointer-events:all;
+      fill:transparent;
+      stroke:transparent;
+    }
+    body.light-mode .asset-chart-tooltip{
+      background:rgba(255,255,255,0.98);
+      border-color:rgba(0,180,216,0.28);
+      box-shadow:0 10px 30px rgba(0,0,0,0.16);
+    }
+
+
+    .asset-location-dropdown{
+      position:relative;
+      width:100%;
+      max-width:420px;
+      min-width:260px;
+      font-size:12px;
+    }
+    .asset-location-dropdown-btn{
+      width:100%;
+      background:linear-gradient(180deg, rgba(0,180,216,0.16), rgba(0,180,216,0.08));
+      border:1px solid rgba(0,180,216,0.24);
+      color:var(--t1);
+      border-radius:9px;
+      padding:9px 34px 9px 12px;
+      font-size:12px;
+      font-weight:700;
+      text-align:left;
+      cursor:pointer;
+      display:block;
+      overflow:hidden;
+      white-space:nowrap;
+      text-overflow:ellipsis;
+      position:relative;
+      box-shadow:inset 0 1px 0 rgba(255,255,255,0.03);
+    }
+    .asset-location-dropdown-btn:hover{
+      border-color:rgba(0,180,216,0.45);
+      background:linear-gradient(180deg, rgba(0,180,216,0.22), rgba(0,180,216,0.10));
+    }
+    .asset-location-dropdown-btn::after{
+      content:'';
+      position:absolute;
+      right:13px;
+      top:50%;
+      width:7px;
+      height:7px;
+      border-right:2px solid var(--acc);
+      border-bottom:2px solid var(--acc);
+      transform:translateY(-65%) rotate(45deg);
+      opacity:0.9;
+    }
+    .asset-location-dropdown.open .asset-location-dropdown-btn::after{
+      transform:translateY(-35%) rotate(225deg);
+    }
+    .asset-location-dropdown-menu{
+      display:none;
+      position:absolute;
+      top:calc(100% + 8px);
+      right:0;
+      width:100%;
+      max-height:260px;
+      overflow:auto;
+      background:rgba(12,17,27,0.98);
+      border:1px solid rgba(0,180,216,0.26);
+      border-radius:10px;
+      box-shadow:0 18px 40px rgba(0,0,0,0.48);
+      z-index:5000;
+      padding:6px;
+      backdrop-filter:blur(12px);
+    }
+    .asset-location-dropdown.open .asset-location-dropdown-menu{
+      display:block;
+    }
+    .asset-location-dropdown-option{
+      padding:9px 10px;
+      border-radius:7px;
+      color:var(--t2);
+      cursor:pointer;
+      font-size:12px;
+      line-height:1.25;
+      display:flex;
+      justify-content:space-between;
+      gap:10px;
+      align-items:center;
+    }
+    .asset-location-dropdown-option:hover{
+      background:rgba(0,180,216,0.12);
+      color:var(--t1);
+    }
+    .asset-location-dropdown-option.active{
+      background:rgba(0,180,216,0.18);
+      color:var(--acc);
+    }
+    .asset-location-dropdown-option-name{
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+    .asset-location-dropdown-option-value{
+      font-family:var(--m);
+      color:var(--g);
+      white-space:nowrap;
+      font-size:11px;
+    }
+
+    
+    /* v48 polish: brighten normal dashboard text without changing headers/accent values */
+    .stat-label,
+    .char-corp,
+    .char-alliance,
+    .queue-item-name,
+    .queue-item-time,
+    .skill-info-name,
+    .skill-info-value,
+    .train-name,
+    .train-time,
+    .train-skill-remaining,
+    .asset-line-name,
+    .asset-row span:first-child,
+    .asset-loc-name,
+    .market-name,
+    .tx-desc,
+    .tx-time,
+    .ship-loc,
+    .wallet-change,
+    .wealth-stat-label,
+    .queue-next,
+    .training-time,
+    .training-skill-name,
+    .train-queue-label,
+    .asset-location-title,
+    .asset-location-select-label,
+    .asset-line-qty,
+    .asset-line-meta,
+    .location-line-name {
+      color: var(--t2) !important;
+    }
+
+    .stat-row .stat-label,
+    .queue-item,
+    .asset-row,
+    .market-row,
+    .tx-item,
+    .ship-item,
+    .train-row {
+      color: var(--t2);
+    }
+
+  
+    /* v50 polish: theme-safe tile and column headers */
+    .panel-title,
+    .section-title,
+    .tile-title,
+    .card-title,
+    .table-header,
+    .table-head,
+    .column-header,
+    .train-queue-header,
+    .asset-table-header,
+    .market-table-header,
+    .fleet-table-header,
+    .skill-table-header,
+    .queue-next,
+    #tab-training .panel > div[style*="text-transform:uppercase"],
+    #tab-assets .panel > div[style*="text-transform:uppercase"],
+    #tab-finance .panel > div[style*="text-transform:uppercase"],
+    #tab-market .panel > div[style*="text-transform:uppercase"],
+    #tab-fleet .panel > div[style*="text-transform:uppercase"],
+    .train-row-header span,
+    .asset-list-header span,
+    .market-list-header span,
+    .fleet-list-header span {
+      color: var(--heading) !important;
+    }
+
+    .panel-title {
+      color: var(--heading) !important;
+    }
+
+  
+    /* v50 safety: headers follow active theme instead of staying white in light mode */
+    body.light-mode .panel-title,
+    body.light-mode .section-title,
+    body.light-mode .tile-title,
+    body.light-mode .card-title,
+    body.light-mode .table-header,
+    body.light-mode .table-head,
+    body.light-mode .column-header,
+    body.light-mode .train-queue-header,
+    body.light-mode .asset-table-header,
+    body.light-mode .market-table-header,
+    body.light-mode .fleet-table-header,
+    body.light-mode .skill-table-header,
+    body.light-mode .queue-next,
+    body.light-mode #tab-training .panel > div[style*="text-transform:uppercase"],
+    body.light-mode #tab-assets .panel > div[style*="text-transform:uppercase"],
+    body.light-mode #tab-finance .panel > div[style*="text-transform:uppercase"],
+    body.light-mode #tab-market .panel > div[style*="text-transform:uppercase"],
+    body.light-mode #tab-fleet .panel > div[style*="text-transform:uppercase"] {
+      color: var(--heading) !important;
+    }
+
+  
+    /* v68 Notes tab */
+    .notes-shell{display:grid;grid-template-columns:360px 1fr;gap:16px;min-height:620px}
+    .notes-sidebar{display:flex;flex-direction:column;gap:12px}
+    .notes-toolbar{display:flex;gap:10px;align-items:center;margin-bottom:12px}
+    .notes-search{width:100%;background:rgba(255,255,255,0.04);border:1px solid var(--border);border-radius:10px;color:var(--heading);padding:11px 12px;font-size:13px;outline:none}
+    .notes-search:focus{border-color:rgba(0,180,216,0.45)}
+    .notes-grid{display:grid;grid-template-columns:1fr;gap:10px;max-height:520px;overflow:auto;padding-right:4px}
+    .note-tile{background:rgba(255,255,255,0.035);border:1px solid var(--border);border-radius:12px;padding:14px;min-height:112px;cursor:pointer;transition:all 0.18s ease;position:relative}
+    .note-tile:hover{border-color:rgba(0,180,216,0.35);transform:translateY(-1px)}
+    .note-tile.active{border-color:rgba(0,180,216,0.65);background:rgba(0,180,216,0.075)}
+    .note-tile-title{font-size:14px;font-weight:700;color:var(--heading);margin-bottom:7px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+    .note-tile-preview{font-size:12px;line-height:1.45;color:var(--t2);height:36px;overflow:hidden;margin-bottom:10px}
+    .note-tile-meta{font-family:var(--m);font-size:10px;color:var(--t3);display:flex;justify-content:space-between;gap:8px;text-transform:uppercase;letter-spacing:0.5px}
+    .note-new-tile{border:1px dashed rgba(0,180,216,0.45);background:rgba(0,180,216,0.045);display:flex;align-items:center;justify-content:center;text-align:center;color:var(--acc);font-weight:800;letter-spacing:0.3px}
+    .note-new-tile span{display:block;font-family:var(--m);font-size:22px;line-height:1;margin-bottom:8px}
+    .notes-editor-panel{min-height:620px;display:flex;flex-direction:column}
+    .notes-editor-header{display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:12px}
+    .notes-editor-actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:flex-end}
+    .notes-title-input{width:100%;background:transparent;border:0;border-bottom:1px solid var(--border);padding:6px 0 12px;color:var(--heading);font-size:24px;font-weight:800;outline:none}
+    .notes-title-input:focus{border-bottom-color:rgba(0,180,216,0.55)}
+    .notes-meta-row{display:flex;gap:12px;align-items:center;margin:10px 0 16px;color:var(--t3);font-family:var(--m);font-size:11px}
+    .notes-status{color:var(--g)}
+    .notes-body{flex:1;width:100%;min-height:420px;background:rgba(255,255,255,0.025);border:1px solid var(--border);border-radius:12px;color:var(--t2);padding:16px;font-size:14px;line-height:1.7;resize:vertical;outline:none}
+    .notes-body:focus{border-color:rgba(0,180,216,0.42)}
+    .notes-empty{height:100%;display:flex;align-items:center;justify-content:center;text-align:center;color:var(--t2);padding:30px}
+    .notes-empty h2{font-size:28px;color:var(--heading);margin-bottom:10px}
+    .notes-empty p{font-size:14px;line-height:1.6;max-width:460px}
+    .notes-btn{border:1px solid var(--border);background:rgba(255,255,255,0.035);color:var(--heading);border-radius:10px;padding:10px 13px;font-size:12px;font-weight:800;cursor:pointer;transition:all 0.16s ease}
+    .notes-btn:hover{border-color:rgba(0,180,216,0.45);background:rgba(0,180,216,0.08)}
+    .notes-btn.primary{background:var(--acc);border-color:var(--acc);color:#001018}
+    .notes-btn.danger{color:var(--r);border-color:rgba(248,113,113,0.22)}
+    .notes-template-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+    .notes-template-chip{font-family:var(--m);font-size:10px;border:1px solid var(--border);background:rgba(255,255,255,0.025);color:var(--t2);border-radius:999px;padding:7px 9px;cursor:pointer}
+    .notes-template-chip:hover{color:var(--acc);border-color:rgba(0,180,216,0.35)}
+    body.light-mode .notes-search,
+    body.light-mode .notes-title-input,
+    body.light-mode .notes-body{color:var(--heading);background:rgba(255,255,255,0.65)}
+    body.light-mode .note-tile,
+    body.light-mode .notes-body{background:rgba(255,255,255,0.62)}
+    @media(max-width:1050px){.notes-shell{grid-template-columns:1fr}.notes-grid{grid-template-columns:repeat(2,1fr);max-height:none}.notes-editor-panel{min-height:520px}}
+    @media(max-width:720px){.notes-grid{grid-template-columns:1fr}.notes-editor-header{display:block}.notes-editor-actions{justify-content:flex-start;margin-top:12px}.notes-title-input{font-size:20px}}
+
+  
+    .notes-grid{padding-top:6px}
+    .notes-delete-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.68);backdrop-filter:blur(8px);z-index:12000;display:none;align-items:center;justify-content:center;padding:22px}
+    .notes-delete-overlay.show{display:flex;animation:notesModalFade 0.18s ease}
+    .notes-delete-modal{width:100%;max-width:430px;background:rgba(14,18,28,0.98);border:1px solid rgba(248,113,113,0.22);border-radius:18px;padding:26px;box-shadow:0 24px 70px rgba(0,0,0,0.42)}
+    .notes-delete-kicker{font-family:var(--m);font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--r);margin-bottom:10px;font-weight:800}
+    .notes-delete-modal h3{font-size:22px;color:var(--heading);margin-bottom:10px}
+    .notes-delete-modal p{font-size:14px;line-height:1.65;color:var(--t2);margin-bottom:22px}
+    .notes-delete-name{font-weight:800;color:var(--heading)}
+    .notes-delete-actions{display:flex;gap:10px;justify-content:flex-end}
+    .notes-modal-btn{border:1px solid var(--border);background:rgba(255,255,255,0.04);color:var(--heading);border-radius:10px;padding:11px 14px;font-size:12px;font-weight:800;cursor:pointer;transition:all 0.16s ease}
+    .notes-modal-btn:hover{border-color:rgba(0,180,216,0.4);background:rgba(0,180,216,0.08)}
+    .notes-modal-btn.delete{background:rgba(248,113,113,0.12);border-color:rgba(248,113,113,0.35);color:var(--r)}
+    .notes-modal-btn.delete:hover{background:rgba(248,113,113,0.18)}
+    body.light-mode .notes-delete-modal{background:rgba(255,255,255,0.98);border-color:rgba(185,28,28,0.22);box-shadow:0 24px 70px rgba(0,0,0,0.18)}
+    @keyframes notesModalFade{from{opacity:0}to{opacity:1}}
+
+  
+    .notes-pin-btn{display:inline-flex;align-items:center;gap:7px;min-width:74px;justify-content:center}
+    .notes-pin-btn svg{width:15px;height:15px;display:block;overflow:visible;fill:#ffffff;stroke:none;opacity:1}
+    body.light-mode .notes-pin-btn svg{fill:#111111}
+    .notes-pin-btn.is-pinned{border-color:rgba(0,180,216,0.55);background:rgba(0,180,216,0.12);color:var(--acc)}
+    .notes-pin-btn.is-pinned svg{fill:#ffffff}
+    body.light-mode .notes-pin-btn.is-pinned svg{fill:#111111}
+    .note-pin-badge{font-family:var(--m);font-size:9px;font-weight:900;letter-spacing:0.7px;text-transform:uppercase;color:var(--acc);border:1px solid rgba(0,180,216,0.28);background:rgba(0,180,216,0.08);border-radius:999px;padding:3px 6px;margin-left:7px;vertical-align:middle}
+
+  </style>
+  <link rel="icon" type="image/png" href="/favicon.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V431CY30BX"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-V431CY30BX");</script>
+</head>
+<body>
+<!-- MMOBASE BUILD real-dashboard-v74-solid-pin-icon-20260520_0435 -->
+<header>
+    <div class="logo">MMOBASE</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="dashboard">Dashboard</a>
+      <a href="transparency">Transparency</a>
+      <a href="donations">Donations</a>
+      <div class="user-menu">
+        <a href="#" class="nav-cta" id="authButton" onclick="window.location.href='/dashboard'">Get Started</a>
+        <div class="user-dropdown" id="userDropdown">
+          <a href="profile.html">Profile</a>
+          <a href="settings.html">Settings</a>
+          <hr>
+          <a href="#" onclick="handleSignOut(event)">Sign Out</a>
+        </div>
+      </div>
+      <button class="mode-toggle" id="modeToggle" onclick="toggleDarkLight()" title="Toggle light/dark mode"><svg id="modeIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+    </nav>
+  </header>
+  <main>
+    <div class="page-bar">
+      <h1>EVE Online</h1>
+    </div>
+    <div class="tab-nav">
+      <button class="tab-btn active" onclick="switchTab('overview',this)">Overview</button>
+      <button class="tab-btn" onclick="switchTab('training',this)">Training</button>
+      <button class="tab-btn" onclick="switchTab('finance',this)">Finance</button>
+      <button class="tab-btn" onclick="switchTab('assets',this)">Assets</button>
+      <button class="tab-btn" onclick="switchTab('market',this)">Market</button>
+      <button class="tab-btn" onclick="switchTab('fleet',this)">Fleet</button>
+      <button class="tab-btn" onclick="switchTab('notes',this);mmobaseNotesRender();">Notes</button>
+      <button class="tab-btn" onclick="switchTab('industry',this)">Industry</button>
+      <button class="tab-btn" onclick="switchTab('pve',this)">PVE</button>
+      <button class="tab-btn" onclick="switchTab('goals',this)">Goals</button>
+      <span class="tab-nav-spacer"></span>
+      <div class="char-switcher">
+        <button class="char-switcher-btn" onclick="toggleCharDropdown(event)">
+          Loading...
+          <svg viewBox="0 0 10 10"><path d="M1 3 L5 7 L9 3 Z"/></svg>
+        </button>
+        <div class="char-dropdown" id="charDropdown">
+          <div class="char-dropdown-label">Your Characters</div>
+          <div class="char-item" style="cursor:default;">
+            <span class="char-item-dot"></span>
+            <span>Loading characters...</span>
+          </div>
+          <hr>
+          <a href="#" onclick="return false;" class="char-connect-new">
+            <svg viewBox="0 0 24 24"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+            Connect Another Account
+          </a>
+        </div>
+      </div>
+    </div>
+    <div id="tab-overview" class="tab-content active">
+
+      <div class="overview-grid">
+
+        <div class="panel">
+          <div class="panel-title">Character</div>
+          <div class="char-header">
+            <div class="char-portrait" id="overview-char-portrait">&#x2B21;</div>
+            <div>
+              <div class="char-name" id="overview-char-name">Loading...</div>
+              <div class="char-corp" id="overview-char-corp">Loading...</div>
+              <div class="char-alliance" id="overview-char-alliance"></div>
+            </div>
+          </div>
+          <div class="stat-row"><span class="stat-label">Skill Points</span><span class="stat-val sp" id="overview-skill-points">Loading...</span></div>
+          <div class="stat-row"><span class="stat-label">Security Status</span><span class="stat-val" id="overview-security-status">Loading...</span></div>
+          <div class="stat-row"><span class="stat-label">Current Ship</span><span class="stat-val" id="overview-current-ship">Loading...</span></div>
+          <div class="stat-row"><span class="stat-label">Location</span><span class="stat-val" id="overview-location">Loading...</span></div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Today's Summary</div>
+          <div style="text-align:center;margin-bottom:16px;">
+            <div id="overview-today-net" style="font-family:var(--m);font-size:32px;font-weight:700;color:var(--t2);">Loading...</div>
+            <div id="overview-today-label" style="font-size:12px;color:var(--t3);margin-top:4px;">Net change today</div>
+          </div>
+          <div style="margin-top:16px;">
+            <div class="stat-row"><span class="stat-label">Incomings</span><span class="stat-val isk" id="overview-today-income">Loading...</span></div>
+            <div class="stat-row"><span class="stat-label">Outgoings</span><span class="stat-val" id="overview-today-outgoing">Loading...</span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Currently Training</div>
+          <div class="training-active">
+            <div><span class="training-skill-name" id="overview-training-name">Loading...</span><span class="training-level" id="overview-training-level"></span></div>
+            <span class="training-time" id="overview-training-time">Loading...</span>
+          </div>
+          <div class="training-bar"><div class="training-bar-fill" id="overview-training-bar" style="width:0%"></div></div>
+          <div class="queue-next">Up Next</div>
+          <div id="overview-training-queue">
+            <div class="queue-item"><span><span class="queue-item-name">Loading queue...</span></span><span class="queue-item-time"></span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Wallet Balance</div>
+          <div class="wallet-balance" id="overview-wallet-balance">Loading...</div>
+          <div class="wallet-change" id="overview-wallet-today">Loading...</div>
+          <div style="margin-top:16px;">
+            <div class="stat-row"><span class="stat-label">This Week</span><span class="stat-val isk" id="overview-wallet-week">Loading...</span></div>
+            <div class="stat-row"><span class="stat-label">This Month</span><span class="stat-val isk" id="overview-wallet-month">Loading...</span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Estimated Asset Value</div>
+          <div class="assets-total" id="overview-asset-value">Loading...</div>
+          <div style="margin-top:16px;">
+            <div class="stat-row"><span class="stat-label">Stations</span><span class="stat-val" id="overview-asset-stations">Loading...</span></div>
+            <div class="stat-row"><span class="stat-label">Ships</span><span class="stat-val" id="overview-asset-ships">Loading...</span></div>
+            <div class="stat-row"><span class="stat-label">7d Change</span><span class="stat-val isk" id="overview-asset-7d">Loading...</span></div>
+            <div class="stat-row"><span class="stat-label">30d Change</span><span class="stat-val isk" id="overview-asset-30d">Loading...</span></div>
+          </div>
+        </div>
+
+        <div class="panel">
+          <div class="panel-title">Net Worth Snapshot</div>
+          <div style="text-align:center;margin-bottom:16px;">
+            <div id="overview-net-worth" style="font-family:var(--m);font-size:32px;font-weight:700;color:var(--g);">Loading...</div>
+            <div style="font-size:12px;color:var(--t3);margin-top:4px;">Wallet + estimated assets</div>
+          </div>
+          <div style="margin-top:16px;">
+            <div class="stat-row"><span class="stat-label">Wallet</span><span class="stat-val isk" id="overview-net-wallet">Loading...</span></div>
+            <div class="stat-row"><span class="stat-label">Assets</span><span class="stat-val isk" id="overview-net-assets">Loading...</span></div>
+            <div class="stat-row"><span class="stat-label">30d Change</span><span class="stat-val isk" id="overview-net-30d">Building history</span></div>
+          </div>
+        </div>
+
+      </div>
+    
+    </div>
+    <div id="tab-training" class="tab-content">
+      <div style="display:grid;grid-template-columns:2fr 1fr;gap:16px;align-items:start;">
+
+        <!-- CURRENTLY TRAINING -->
+        <div class="panel" style="min-height:240px;height:100%;">
+          <div class="panel-title">Currently Training</div>
+          <div class="training-active" style="margin-bottom:16px;">
+            <div>
+              <span class="training-skill-name">Loading...</span>
+              <span class="training-level">-</span>
+            </div>
+            <span class="training-time">-</span>
+          </div>
+          <div class="training-bar" style="height:8px;margin-bottom:8px;">
+            <div class="training-bar-fill" style="width:0%"></div>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--t3);margin-bottom:4px;">
+            <span id="training-pct">0% complete</span>
+            <span id="training-finish">Finishes: -</span>
+          </div>
+        </div>
+
+        <!-- TRAINING STATS -->
+        <div class="panel" style="min-height:240px;height:100%;">
+          <div class="panel-title">Training Stats</div>
+          <div class="stat-row"><span class="stat-label">Total SP</span><span class="stat-val sp" id="ts-totalsp">0</span></div>
+          <div class="stat-row"><span class="stat-label">Unallocated SP</span><span class="stat-val" id="ts-unalloc">0</span></div>
+          <div class="stat-row"><span class="stat-label">Skills Trained</span><span class="stat-val" id="ts-trained">0</span></div>
+          <div class="stat-row"><span class="stat-label">Skills at V</span><span class="stat-val" id="ts-atfive">0</span></div>
+          <div class="stat-row"><span class="stat-label">Queue Length</span><span class="stat-val" id="ts-queuelen">0 skills</span></div>
+        </div>
+
+        <!-- SKILL QUEUE -->
+        <div class="panel" style="min-height:720px;">
+          <div class="panel-title" id="queue-title">Skill Queue</div>
+          <div style="display:grid;grid-template-columns:1fr 120px 70px 105px 145px;gap:0;font-size:11px;color:var(--t3);text-transform:uppercase;letter-spacing:0.8px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:4px;">
+            <span>Skill</span>
+            <span style="text-align:right;">Progress</span>
+            <span style="text-align:center;">Level</span>
+            <span style="text-align:right;">Remaining</span>
+            <span style="text-align:right;">Remaining Skill Queue</span>
+          </div>
+          <div id="skill-queue-container">
+            <p style="font-size:13px;color:var(--t3);text-align:center;padding:24px 0;">Loading skill queue...</p>
+          </div>
+        </div>
+
+        <div style="display:grid;gap:16px;">
+
+          <!-- ATTRIBUTES -->
+          <div class="panel">
+            <div class="panel-title">Attributes</div>
+            <div class="stat-row"><span class="stat-label">Perception</span><span class="stat-val sp" id="attr-perception">-</span></div>
+            <div class="stat-row"><span class="stat-label">Memory</span><span class="stat-val sp" id="attr-memory">-</span></div>
+            <div class="stat-row"><span class="stat-label">Willpower</span><span class="stat-val sp" id="attr-willpower">-</span></div>
+            <div class="stat-row"><span class="stat-label">Intelligence</span><span class="stat-val sp" id="attr-intelligence">-</span></div>
+            <div class="stat-row"><span class="stat-label">Charisma</span><span class="stat-val sp" id="attr-charisma">-</span></div>
+            <div class="stat-row" style="margin-top:8px;"><span class="stat-label">Bonus Remaps</span><span class="stat-val" id="attr-remaps">-</span></div>
+            <div class="stat-row"><span class="stat-label">Last Remap</span><span class="stat-val" id="attr-lastremap">-</span></div>
+          </div>
+
+          <!-- SKILL POINTS BREAKDOWN -->
+          <div class="panel">
+            <div class="panel-title">Skill Points Breakdown</div>
+            <div id="sp-breakdown-container">
+              <p style="font-size:13px;color:var(--t3);text-align:center;padding:24px 0;">Loading skill breakdown...</p>
+            </div>
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+<div id="tab-finance" class="tab-content">
+      <div class="overview-grid">
+
+        <!-- WALLET BALANCE -->
+        <div class="panel">
+          <div class="panel-title">Wallet Balance</div>
+          <div class="wallet-balance" id="finance-wallet-balance">Loading...</div>
+          <div class="wallet-change" id="finance-wallet-today">Loading today...</div>
+          <div style="margin-top:16px;">
+            <div class="stat-row"><span class="stat-label">This Week</span><span class="stat-val isk" id="finance-wallet-week">Loading...</span></div>
+            <div class="stat-row"><span class="stat-label">This Month</span><span class="stat-val isk" id="finance-wallet-month">Loading...</span></div>
+          </div>
+        </div>
+
+        <!-- TODAY'S P&L -->
+        <div class="panel">
+          <div class="panel-title">Today's Profit &amp; Loss</div>
+          <div style="text-align:center;margin-bottom:16px;">
+            <div id="finance-pnl-today-net" style="font-family:var(--m);font-size:32px;font-weight:700;color:var(--t2);">Loading...</div>
+            <div id="finance-pnl-today-label" style="font-size:12px;color:var(--t3);margin-top:4px;">Net change today</div>
+          </div>
+          <div style="margin-top:16px;">
+            <div class="stat-row"><span class="stat-label">Incomings</span><span class="stat-val isk" id="finance-pnl-today-income">Loading...</span></div>
+            <div class="stat-row"><span class="stat-label">Outgoings</span><span class="stat-val" id="finance-pnl-today-outgoing">Loading...</span></div>
+          </div>
+        </div>
+
+        <!-- INCOME SOURCES (7 DAY) -->
+        <div class="panel">
+          <div class="panel-title">Daily Averages — 30 Days</div>
+          <div class="stat-row"><span class="stat-label">Avg. Daily Income</span><span class="stat-val isk" id="finance-avg-daily-income">Loading...</span></div>
+          <div class="stat-row"><span class="stat-label">Avg. Daily Expenses</span><span class="stat-val" id="finance-avg-daily-expenses">Loading...</span></div>
+          <div class="stat-row"><span class="stat-label">Avg. Daily Profit</span><span class="stat-val isk" id="finance-avg-daily-profit">Loading...</span></div>
+          <div class="stat-row"><span class="stat-label">Best Day</span><span class="stat-val isk" id="finance-avg-best-day">Loading...</span></div>
+          <div class="stat-row"><span class="stat-label">Worst Day</span><span class="stat-val" id="finance-avg-worst-day">Loading...</span></div>
+        </div>
+
+        <!-- WALLET HISTORY CHART -->
+        <div class="panel" style="grid-column: span 3;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:12px;">
+            <div class="panel-title" style="margin-bottom:0;">Wallet Balance</div>
+            <div style="display:flex;gap:6px;">
+              <button class="asset-range-btn wallet-range-btn" onclick="setWalletBalanceRange(7, this)" style="background:var(--adim);color:var(--acc);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-family:var(--m);font-size:11px;cursor:pointer;">7</button>
+              <button class="asset-range-btn wallet-range-btn" onclick="setWalletBalanceRange(14, this)" style="background:transparent;color:var(--t3);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-family:var(--m);font-size:11px;cursor:pointer;">14</button>
+              <button class="asset-range-btn wallet-range-btn" onclick="setWalletBalanceRange(30, this)" style="background:transparent;color:var(--t3);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-family:var(--m);font-size:11px;cursor:pointer;">30</button>
+            </div>
+          </div>
+          <div class="wealth-row">
+            <div><div class="wealth-stat-label">Current</div><div class="wealth-stat-value" id="wallet-chart-current" style="color:var(--acc)">Loading...</div></div>
+            <div><div class="wealth-stat-label" id="wallet-chart-change-label">Status</div><div class="wealth-stat-value" id="wallet-chart-change">Building 30-day history</div></div>
+          </div>
+          <div id="wallet-balance-line-chart" style="height:135px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:10px 0;margin-top:4px;">
+            <svg id="wallet-balance-svg" viewBox="0 0 600 135" style="width:100%;height:100%;overflow:visible;">
+              <polyline id="wallet-balance-line" points="" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>
+              <g id="wallet-balance-points"></g>
+            </svg>
+          </div>
+          <div style="display:flex;justify-content:space-between;font-family:var(--m);font-size:10px;color:var(--t3);margin-top:8px;">
+            <span id="wallet-chart-range-start">7 days ago</span><span>Today</span>
+          </div>
+        </div>
+
+        <!-- FULL TRANSACTION LOG -->
+        
+
+        <!-- EXPENSE BREAKDOWN -->
+        
+
+        <!-- DAILY AVERAGES -->
+        
+
+        <!-- ISK/HR -->
+        
+
+      </div>
+    </div>
+    <div id="tab-assets" class="tab-content">
+      <div class="overview-grid">
+
+        <!-- TOTAL ASSETS VALUE -->
+        <div class="panel">
+          <div class="panel-title">Estimated Asset Value</div>
+          <div class="assets-total" id="assets-total-value">Calculating...</div>
+          <div style="margin-top:12px;">
+            <div class="stat-row"><span class="stat-label">Stations</span><span class="stat-val" id="assets-stations">0</span></div>
+            <div class="stat-row"><span class="stat-label">Ships</span><span class="stat-val" id="assets-ships">0</span></div>
+            <div class="stat-row"><span class="stat-label">7d Change</span><span class="stat-val" id="assets-change-7d">—</span></div>
+            <div class="stat-row"><span class="stat-label">14d Change</span><span class="stat-val" id="assets-change-14d">—</span></div>
+            <div class="stat-row"><span class="stat-label">30d Change</span><span class="stat-val" id="assets-change-30d">—</span></div>
+          </div>
+        </div>
+
+
+        <!-- ASSET VALUE OVER TIME -->
+        <div class="panel" style="grid-column: span 2;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px;gap:16px;">
+            <div class="panel-title" style="margin-bottom:0;">Asset Value Trend</div>
+            <div class="asset-range-toggle" style="display:flex;gap:6px;align-items:center;">
+              <button class="asset-range-btn active" data-days="7" onclick="setAssetValueRange(7,this)" style="padding:5px 10px;border:1px solid var(--border);background:var(--adim);color:var(--acc);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">7D</button>
+              <button class="asset-range-btn" data-days="14" onclick="setAssetValueRange(14,this)" style="padding:5px 10px;border:1px solid var(--border);background:transparent;color:var(--t3);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">14D</button>
+              <button class="asset-range-btn" data-days="30" onclick="setAssetValueRange(30,this)" style="padding:5px 10px;border:1px solid var(--border);background:transparent;color:var(--t3);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">30D</button>
+            </div>
+          </div>
+
+          <div class="wealth-row">
+            <div><div class="wealth-stat-label">Current</div><div class="wealth-stat-value" id="asset-chart-current" style="color:var(--acc)">Calculating...</div></div>
+            <div><div class="wealth-stat-label" id="asset-chart-change-label">Status</div><div class="wealth-stat-value" id="asset-chart-change">Building 7-day history</div></div>
+          </div>
+          <div id="asset-value-line-chart" style="height:135px;border-top:1px solid var(--border);border-bottom:1px solid var(--border);padding:10px 0;margin-top:4px;">
+            <svg id="asset-value-svg" viewBox="0 0 600 135" style="width:100%;height:100%;overflow:visible;">
+              <polyline id="asset-value-line" points="" fill="none" stroke="var(--acc)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"></polyline>
+              <g id="asset-value-points"></g>
+            </svg>
+          </div>
+
+          <div style="display:flex;justify-content:space-between;font-family:var(--m);font-size:10px;color:var(--t3);margin-top:8px;">
+            <span id="asset-chart-start-label">7 days ago</span>
+            <span>Today</span>
+          </div>
+        </div>
+
+
+
+
+        <!-- 1DQ ASSETS -->
+        <div class="panel">
+          <div class="panel-title">Value by Location</div>
+          <div id="asset-locations-container">
+            <p style="font-size:13px;color:var(--t3);text-align:center;padding:18px 0;">Calculating asset locations...</p>
+          </div>
+        </div>
+
+        <div class="panel" style="grid-column: span 2;">
+          <div style="display:flex;justify-content:space-between;align-items:center;gap:16px;margin-bottom:12px;">
+            <div class="panel-title" id="asset-station-view-title" style="margin-bottom:0;">Asset Location Contents</div>
+            <div id="asset-location-dropdown" class="asset-location-dropdown">
+              <button id="asset-location-dropdown-btn" class="asset-location-dropdown-btn" type="button" onclick="toggleAssetLocationDropdown(event)">Loading locations...</button>
+              <div id="asset-location-dropdown-menu" class="asset-location-dropdown-menu"></div>
+            </div>
+          </div>
+          <div style="display:grid;grid-template-columns:1fr 80px 120px;gap:0;font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.8px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:4px;">
+            <span>Item</span><span style="text-align:center">Qty</span><span style="text-align:right">Value</span>
+          </div>
+          <div id="asset-location-items-container">
+            <p style="font-size:13px;color:var(--t3);text-align:center;padding:18px 0;">Choose a location to view assets</p>
+          </div>
+        </div>
+
+        <!-- HIGH VALUE ITEMS -->
+        
+
+        <!-- JITA ASSETS -->
+        
+
+        <!-- RECENT ASSET CHANGES -->
+        
+
+        <!-- VALUE BY LOCATION -->
+        
+
+
+      </div>
+    </div>
+    <div id="tab-market" class="tab-content">
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;align-items:stretch;">
+
+        <!-- MARKET OVERVIEW -->
+        <div class="panel" style="min-height:190px;height:100%;">
+          <div class="panel-title">Market Overview</div>
+          <div class="stat-row"><span class="stat-label">Active Buy Orders</span><span class="stat-val sp" id="mkt-buy-count">0</span></div>
+          <div class="stat-row"><span class="stat-label">Active Sell Orders</span><span class="stat-val sp" id="mkt-sell-count">0</span></div>
+          <div class="stat-row"><span class="stat-label">ISK in Buy Orders</span><span class="stat-val" id="mkt-buy-isk">0 ISK</span></div>
+          <div class="stat-row"><span class="stat-label">ISK in Sell Orders</span><span class="stat-val" id="mkt-sell-isk">0 ISK</span></div>
+          <div class="stat-row"><span class="stat-label">Escrow</span><span class="stat-val" id="mkt-escrow">0 ISK</span></div>
+        </div>
+
+        <!-- POPULAR JITA PRICES -->
+        <div class="panel" style="grid-column:span 2;min-height:190px;height:100%;">
+          <div class="panel-title">Popular — Jita Prices</div>
+          <div style="display:grid;grid-template-columns:1fr 100px 100px 80px 40px;gap:0;font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.8px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:4px;">
+            <span>Item</span>
+            <span style="text-align:right;">Buy</span>
+            <span style="text-align:right;">Sell</span>
+            <span style="text-align:right;">Spread</span>
+            <span></span>
+          </div>
+          <div id="jita-prices-container">
+            <p style="font-size:13px;color:var(--t3);text-align:center;padding:34px 0;">Loading prices...</p>
+          </div>
+        </div>
+
+        <!-- MY BUY ORDERS -->
+        <div class="panel" style="min-height:145px;">
+          <div class="panel-title" id="buy-orders-title">My Buy Orders — 0 Active</div>
+          <div style="display:grid;grid-template-columns:1fr 60px 100px 100px 80px;gap:0;font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.8px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:4px;">
+            <span>Item</span>
+            <span style="text-align:center;">Qty</span>
+            <span style="text-align:right;">Price</span>
+            <span style="text-align:right;">Total</span>
+            <span style="text-align:right;">Status</span>
+          </div>
+          <div id="buy-orders-container" style="min-height:62px;">
+            <p style="font-size:13px;color:var(--t3);text-align:center;padding:24px 0;">No active buy orders</p>
+          </div>
+        </div>
+
+        <!-- MY SELL ORDERS -->
+        <div class="panel" style="min-height:145px;">
+          <div class="panel-title" id="sell-orders-title">My Sell Orders — 0 Active</div>
+          <div style="display:grid;grid-template-columns:1fr 60px 100px 100px 80px;gap:0;font-size:10px;color:var(--t3);text-transform:uppercase;letter-spacing:0.8px;padding-bottom:8px;border-bottom:1px solid var(--border);margin-bottom:4px;">
+            <span>Item</span>
+            <span style="text-align:center;">Qty</span>
+            <span style="text-align:right;">Price</span>
+            <span style="text-align:right;">Total</span>
+            <span style="text-align:right;">Status</span>
+          </div>
+          <div id="sell-orders-container">
+            <p style="font-size:13px;color:var(--t3);text-align:center;padding:24px 0;">No active sell orders</p>
+          </div>
+        </div>
+
+        <!-- RECENT TRADE HISTORY -->
+        
+
+      </div>
+    </div>
+    <div id="tab-fleet" class="tab-content">
+      <div style="display:grid;grid-template-columns:1fr 2fr;gap:16px;align-items:stretch;">
+
+        <div style="display:grid;grid-template-rows:1fr auto;gap:16px;">
+
+          <!-- ACTIVE SHIP -->
+          <div class="panel">
+            <div class="panel-title">Active Ship</div>
+            <div style="text-align:center;padding:16px 0 20px;">
+              <div style="width:80px;height:80px;margin:0 auto 14px;background:linear-gradient(135deg,rgba(248,113,113,0.12),rgba(248,113,113,0.04));border-radius:14px;display:flex;align-items:center;justify-content:center;border:1px solid rgba(248,113,113,0.2);">
+                <span style="font-size:28px;color:var(--r);">&#9670;</span>
+              </div>
+              <div style="font-size:20px;font-weight:700;">Loading...</div>
+              <div style="font-size:12px;color:var(--r);font-weight:600;margin-top:4px;">Ship type</div>
+            </div>
+            <div class="stat-row"><span class="stat-label">Location</span><span class="stat-val">-</span></div>
+            <div class="stat-row"><span class="stat-label">Status</span><span class="stat-val" style="color:var(--g)">Docked</span></div>
+            <div class="stat-row"><span class="stat-label">Est. Value</span><span class="stat-val sp">-</span></div>
+          </div>
+
+          <!-- FLEET COMPOSITION -->
+          <div class="panel">
+            <div class="panel-title" id="fleet-comp-title">Fleet Composition</div>
+            <div id="fleet-comp-container" style="min-height:82px;display:flex;align-items:center;justify-content:center;">
+              <p style="font-size:13px;color:var(--t3);text-align:center;">No fleet data</p>
+            </div>
+          </div>
+
+        </div>
+
+        <!-- FLEET MEMBERS -->
+        <div class="panel" style="min-height:520px;">
+          <div class="panel-title" id="fleet-panel-title">Fleet Members</div>
+          <div id="fleet-members-container" style="height:100%;display:flex;align-items:center;justify-content:center;">
+            <p style="font-size:13px;color:var(--t3);text-align:center;">
+              Not currently in a fleet<br>
+              <span style="font-size:11px;color:var(--t3);opacity:0.6;">Join a fleet in-game and ensure fleet auth is enabled to see members here</span>
+            </p>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <div id="tab-notes" class="tab-content">
+      <div class="notes-shell">
+        <div class="notes-sidebar">
+          <div class="panel">
+            <div class="panel-title">Notes</div>
+            <div class="notes-toolbar">
+              <input id="notes-search" class="notes-search" type="text" placeholder="Search notes..." oninput="mmobaseNotesRender()">
+            </div>
+            <div id="notes-grid" class="notes-grid"></div>
+          </div>
+        </div>
+
+        <div class="panel notes-editor-panel">
+          <div class="notes-editor-header">
+            <div style="flex:1;">
+              <div class="panel-title">Selected Note</div>
+              <input id="notes-title" class="notes-title-input" type="text" placeholder="Select or create a note" oninput="mmobaseNotesUpdateTitle(this.value)" disabled>
+              <div class="notes-meta-row">
+                <span id="notes-updated">No note selected</span>
+                <span id="notes-status" class="notes-status"></span>
+              </div>
+            </div>
+            <div class="notes-editor-actions">
+              <button id="notes-pin-btn" class="notes-btn notes-pin-btn" onclick="mmobaseNotesTogglePin()" title="Pin note to top" aria-label="Pin note to top">
+                <svg viewBox="0 0 24 24" aria-hidden="true" class="notes-pin-icon">
+                  <path d="M16 2H8v2h1v8l-2.6 2.6V17h5.1v5h1v-5h5.1v-2.4L15 12V4h1V2z"></path>
+                </svg>
+                <span id="notes-pin-label">Pin</span>
+              </button>
+              <button class="notes-btn" onclick="mmobaseNotesDuplicate()">Duplicate</button>
+              <button class="notes-btn danger" onclick="mmobaseNotesAskDelete()">Delete</button>
+            </div>
+          </div>
+
+          <textarea id="notes-body" class="notes-body" placeholder="Create a note to start writing..." oninput="mmobaseNotesUpdateBody(this.value)" disabled></textarea>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="tab-industry" class="tab-content">
+      <div class="coming-soon">
+        <h2>Industry</h2>
+        <p>Plan production jobs, materials, blueprints, reactions, hauling and build goals from one place. Coming soon.</p>
+      </div>
+    </div>
+
+    <div id="tab-pve" class="tab-content">
+      <div class="coming-soon">
+        <h2>PVE</h2>
+        <p>Track ratting, missions, abyssals, escalations, sites, loot and daily activity summaries. Coming soon.</p>
+      </div>
+    </div>
+
+    <div id="tab-goals" class="tab-content">
+      <div class="coming-soon">
+        <h2>Goals</h2>
+        <p>Set personal targets — SP milestones, ISK goals, ship ownership, skill completions — and track your progress over time. Coming soon.</p>
+      </div>
+    </div>
+  </main>
+
+
+  <div id="notes-delete-overlay" class="notes-delete-overlay" onclick="mmobaseNotesCancelDelete(event)">
+    <div class="notes-delete-modal" onclick="event.stopPropagation()">
+      <div class="notes-delete-kicker">Delete note</div>
+      <h3>Are you sure?</h3>
+      <p>
+        This will permanently delete <span id="notes-delete-name" class="notes-delete-name">this note</span> from this browser.
+      </p>
+      <div class="notes-delete-actions">
+        <button class="notes-modal-btn" onclick="mmobaseNotesCancelDelete()">Cancel</button>
+        <button class="notes-modal-btn delete" onclick="mmobaseNotesConfirmDelete()">Delete Note</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- AUTH MODAL -->
+  <div id="authModal" class="modal-overlay" onclick="closeModalOnOverlay(event)" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:10000;justify-content:center;align-items:center;padding:20px;">
+    <div style="background:#fff;border-radius:24px;width:100%;max-width:440px;padding:48px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:fadeUp 0.3s ease;">
+      <button onclick="closeModal()" style="position:absolute;top:20px;right:20px;background:transparent;border:none;font-size:28px;color:#666;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50;">&times;</button>
+      <div style="text-align:center;margin-bottom:40px;">
+        <h1 style="font-size:32px;font-weight:700;margin-bottom:8px;color:#1a1a1a;">Welcome to MMOBASE</h1>
+        <p style="font-size:16px;color:#666;">Track your empire across the stars</p>
+      </div>
+      <div style="display:flex;gap:8px;background:rgba(107,138,255,0.08);border-radius:12px;padding:6px;margin-bottom:32px;">
+        <button class="toggle-btn active" onclick="showSignUp()" style="flex:1;padding:12px;border:none;background:white;border-radius:8px;font-size:15px;font-weight:600;color:#1a1a1a;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08);">Sign Up</button>
+        <button class="toggle-btn" onclick="showSignIn()" style="flex:1;padding:12px;border:none;background:transparent;border-radius:8px;font-size:15px;font-weight:600;color:#666;cursor:pointer;">Sign In</button>
+      </div>
+      <form id="signUpForm" class="auth-form active" style="display:block;">
+        <div style="margin-bottom:20px;"><label style="display:block;font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:8px;">Display Name</label><input type="text" id="signup-name" placeholder="Enter a display name" required style="width:100%;padding:14px 16px;border:1px solid rgba(0,0,0,0.15);border-radius:10px;font-size:15px;color:#1a1a1a;"></div>
+        <div style="margin-bottom:20px;"><label style="display:block;font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:8px;">Email</label><input type="email" id="signup-email" placeholder="Enter your email" required style="width:100%;padding:14px 16px;border:1px solid rgba(0,0,0,0.15);border-radius:10px;font-size:15px;color:#1a1a1a;"></div>
+        <div style="margin-bottom:20px;"><label style="display:block;font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:8px;">Password</label><input type="password" id="signup-password" placeholder="Create a password" required style="width:100%;padding:14px 16px;border:1px solid rgba(0,0,0,0.15);border-radius:10px;font-size:15px;color:#1a1a1a;"></div>
+        <button type="submit" style="width:100%;padding:16px;background:#1a1a1a;color:white;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;margin-top:8px;">Create Account</button>
+      </form>
+      <form id="signInForm" class="auth-form" style="display:none;">
+        <div style="margin-bottom:20px;"><label style="display:block;font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:8px;">Email</label><input type="email" id="signin-email" placeholder="Enter your email" required style="width:100%;padding:14px 16px;border:1px solid rgba(0,0,0,0.15);border-radius:10px;font-size:15px;color:#1a1a1a;"></div>
+        <div style="margin-bottom:20px;"><label style="display:block;font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:8px;">Password</label><input type="password" id="signin-password" placeholder="Enter your password" required style="width:100%;padding:14px 16px;border:1px solid rgba(0,0,0,0.15);border-radius:10px;font-size:15px;color:#1a1a1a;"></div>
+        <button type="submit" style="width:100%;padding:16px;background:#1a1a1a;color:white;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;margin-top:8px;">Sign In</button>
+      </form>
+      <div style="text-align:center;margin-top:24px;font-size:14px;color:#666;">By continuing, you agree to our <a href="terms-of-service" style="color:#6b8aff;text-decoration:none;font-weight:600;">Terms</a> and <a href="privacy-policy" style="color:#6b8aff;text-decoration:none;font-weight:600;">Privacy Policy</a></div>
+    </div>
+  </div>
+  <script>
+        // Character data presets for the demo
+    const characterData = {
+      'Ben Smith': {
+        corp: 'UK Corp',
+        alliance: 'Goonswarm Federation',
+        sp: '120,000,000',
+        secStatus: '2.4',
+        currentShip: 'Kronos',
+        location: '1DQ1-A',
+        plex: '500',
+        wallet: '30.0B ISK',
+        walletChange: '+248M today',
+        assets: '30.0B ISK',
+        netWorth: '60.0B',
+        change30d: '+4.2B',
+        training: 'Gallente Battleship',
+        trainingLevel: 'V',
+        trainingTime: '12d 4h 22m',
+        trainingProgress: '62%',
+        profit: '+267.9M',
+        ratting: '+63.8M',
+        ess: '+206.0M',
+        expenses: '-1.9M',
+        portrait: '⬡'
+      },
+      'Miner 1': {
+        corp: 'UK Corp',
+        alliance: 'Goonswarm Federation',
+        sp: '48,200,000',
+        secStatus: '5.0',
+        currentShip: 'Hulk',
+        location: 'F-YH5B',
+        plex: '50',
+        wallet: '4.2B ISK',
+        walletChange: '+82M today',
+        assets: '8.6B ISK',
+        netWorth: '12.8B',
+        change30d: '+620M',
+        training: 'Exhumers',
+        trainingLevel: 'V',
+        trainingTime: '18d 2h 44m',
+        trainingProgress: '38%',
+        profit: '+82.4M',
+        ratting: '+0M',
+        ess: '+0M',
+        expenses: '-8.2M',
+        portrait: '◆'
+      },
+      'Miner 2': {
+        corp: 'UK Corp',
+        alliance: 'Goonswarm Federation',
+        sp: '32,600,000',
+        secStatus: '5.0',
+        currentShip: 'Skiff',
+        location: 'F-YH5B',
+        plex: '30',
+        wallet: '2.8B ISK',
+        walletChange: '+68M today',
+        assets: '5.2B ISK',
+        netWorth: '8.0B',
+        change30d: '+410M',
+        training: 'Ice Harvesting',
+        trainingLevel: 'V',
+        trainingTime: '6d 18h 12m',
+        trainingProgress: '74%',
+        profit: '+68.0M',
+        ratting: '+0M',
+        ess: '+0M',
+        expenses: '-4.8M',
+        portrait: '◈'
+      },
+      'Scout': {
+        corp: 'UK Corp',
+        alliance: 'Goonswarm Federation',
+        sp: '28,400,000',
+        secStatus: '4.2',
+        currentShip: 'Stiletto',
+        location: 'Jita',
+        plex: '10',
+        wallet: '820M ISK',
+        walletChange: '+4M today',
+        assets: '1.4B ISK',
+        netWorth: '2.2B',
+        change30d: '+180M',
+        training: 'Interceptors',
+        trainingLevel: 'V',
+        trainingTime: '4d 12h 0m',
+        trainingProgress: '52%',
+        profit: '+4.2M',
+        ratting: '+0M',
+        ess: '+0M',
+        expenses: '-0.8M',
+        portrait: '◇'
+      }
+    };
+
+    function loadCharacter(name) {
+      const d = characterData[name];
+      if (!d) return;
+
+      // Character panel
+      const charNameEl = document.querySelector('.char-name');
+      if (charNameEl) charNameEl.textContent = name;
+      const charCorpEl = document.querySelector('.char-corp');
+      if (charCorpEl) charCorpEl.textContent = d.corp;
+      const charAllianceEl = document.querySelector('.char-alliance');
+      if (charAllianceEl) charAllianceEl.textContent = d.alliance;
+      const portraitEl = document.querySelector('.char-portrait');
+      if (portraitEl) portraitEl.textContent = d.portrait;
+
+      // Character overview stat values (by position - these are in order: SP, Sec Status, Current Ship, Location, PLEX)
+      const charPanel = document.querySelector('#tab-overview .panel');
+      if (charPanel) {
+        const statVals = charPanel.querySelectorAll('.stat-val');
+        if (statVals[0]) statVals[0].textContent = d.sp;
+        if (statVals[1]) statVals[1].textContent = d.secStatus;
+        if (statVals[2]) statVals[2].textContent = d.currentShip;
+        if (statVals[3]) statVals[3].textContent = d.location;
+        if (statVals[4]) statVals[4].textContent = d.plex;
+      }
+
+      // Today's Summary panel (2nd panel in overview grid)
+      const overviewPanels = document.querySelectorAll('#tab-overview .panel');
+      if (overviewPanels[1]) {
+        const summaryVals = overviewPanels[1].querySelectorAll('.stat-val');
+        if (summaryVals[0]) summaryVals[0].textContent = d.ratting;
+        if (summaryVals[1]) summaryVals[1].textContent = d.ess;
+        if (summaryVals[2]) summaryVals[2].textContent = d.expenses;
+        if (summaryVals[3]) summaryVals[3].textContent = d.profit;
+      }
+
+      // Currently Training panel (3rd panel)
+      if (overviewPanels[2]) {
+        const trainName = overviewPanels[2].querySelector('.training-skill-name');
+        if (trainName) trainName.textContent = d.training;
+        const trainLevel = overviewPanels[2].querySelector('.training-level');
+        if (trainLevel) trainLevel.textContent = d.trainingLevel;
+        const trainTime = overviewPanels[2].querySelector('.training-time');
+        if (trainTime) trainTime.textContent = d.trainingTime;
+        const trainBar = overviewPanels[2].querySelector('.training-bar-fill');
+        if (trainBar) trainBar.style.width = d.trainingProgress;
+      }
+
+      // Wallet panel (4th panel)
+      if (overviewPanels[3]) {
+        const walletBal = overviewPanels[3].querySelector('.wallet-balance');
+        if (walletBal) walletBal.textContent = d.wallet;
+        const walletChg = overviewPanels[3].querySelector('.wallet-change');
+        if (walletChg) walletChg.textContent = d.walletChange;
+      }
+
+      // Assets panel (5th panel)
+      if (overviewPanels[4]) {
+        const assetsTotal = overviewPanels[4].querySelector('.assets-total');
+        if (assetsTotal) assetsTotal.textContent = d.assets;
+      }
+
+      // Wealth tracker (7th panel - Wealth — 30 Days)
+      if (overviewPanels[6]) {
+        const wealthVals = overviewPanels[6].querySelectorAll('.wealth-stat-value');
+        if (wealthVals[0]) wealthVals[0].textContent = d.netWorth;
+        if (wealthVals[1]) wealthVals[1].textContent = d.change30d;
+      }
+    }
+
+    function toggleCharDropdown(e){e.preventDefault();e.stopPropagation();document.getElementById('charDropdown').classList.toggle('show')}
+    function switchChar(name,e){e.preventDefault();e.stopPropagation();document.querySelector('.char-switcher-btn').firstChild.textContent=name+' ';document.querySelectorAll('.char-item').forEach(function(el){el.classList.remove('active')});e.currentTarget.classList.add('active');document.getElementById('charDropdown').classList.remove('show');loadCharacter(name)}
+    document.addEventListener('click',function(e){var cd=document.getElementById('charDropdown');var cs=document.querySelector('.char-switcher');if(cd&&cs&&!cs.contains(e.target))cd.classList.remove('show')});
+    function switchTab(name,btn){document.querySelectorAll('.tab-content').forEach(t=>t.classList.remove('active'));document.querySelectorAll('.tab-btn').forEach(b=>b.classList.remove('active'));document.getElementById('tab-'+name).classList.add('active');btn.classList.add('active')}
+    const SUPABASE_URL='https://rfswlpozpwcrlnpymbsr.supabase.co';
+    const SUPABASE_ANON_KEY='eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmc3dscG96cHdjcmxucHltYnNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1NDk3MTcsImV4cCI6MjA4NDEyNTcxN30._5pxb0WCJ0FBQ0_DA8BJjm5jCA9nxVDBn8IOGRjKnoI';
+    const{createClient}=supabase;const supabaseClient=createClient(SUPABASE_URL,SUPABASE_ANON_KEY);
+    async function checkUserSession(){const{data:{session}}=await supabaseClient.auth.getSession();if(session&&session.user){updateUIForSignedInUser(session.user)}}
+    function updateUIForSignedInUser(user){const a=document.getElementById('authButton');a.textContent='Hi, '+( user.user_metadata?.full_name||'User').split(' ')[0];a.onclick=e=>toggleDropdown(e)}
+    function toggleGamesDropdown(e){e.preventDefault();e.stopPropagation();document.getElementById('gamesDropdown').classList.toggle('show')}
+    function toggleDropdown(e){e.preventDefault();e.stopPropagation();document.getElementById('userDropdown').classList.toggle('show')}
+    async function handleAuthClick(e){e.preventDefault();const{data:{session}}=await supabaseClient.auth.getSession();if(session&&session.user){toggleDropdown(e)}else{openModal()}}
+    function openModal(){var m=document.getElementById('authModal');m.style.display='flex';document.body.style.overflow='hidden'}
+    function closeModal(){var m=document.getElementById('authModal');m.style.display='none';document.body.style.overflow='auto'}
+    function closeModalOnOverlay(e){if(e.target===document.getElementById('authModal')){closeModal()}}
+    function showSignUp(){document.getElementById('signUpForm').style.display='block';document.getElementById('signInForm').style.display='none';var btns=document.querySelectorAll('.toggle-btn');btns[0].style.background='white';btns[0].style.color='#1a1a1a';btns[0].style.boxShadow='0 2px 8px rgba(0,0,0,0.08)';btns[1].style.background='transparent';btns[1].style.color='#666';btns[1].style.boxShadow='none'}
+    function showSignIn(){document.getElementById('signInForm').style.display='block';document.getElementById('signUpForm').style.display='none';var btns=document.querySelectorAll('.toggle-btn');btns[1].style.background='white';btns[1].style.color='#1a1a1a';btns[1].style.boxShadow='0 2px 8px rgba(0,0,0,0.08)';btns[0].style.background='transparent';btns[0].style.color='#666';btns[0].style.boxShadow='none'}
+    document.addEventListener('keydown',function(e){if(e.key==='Escape'){closeModal()}})
+    async function handleSignOut(e){e.preventDefault();const{error}=await supabaseClient.auth.signOut();if(!error){document.getElementById('authButton').textContent='Get Started';document.getElementById('authButton').onclick=e=>handleAuthClick(e);document.getElementById('userDropdown').classList.remove('show')}}
+    document.addEventListener('click',function(e){const gd=document.getElementById('gamesDropdown'),gm=document.querySelector('.games-menu');if(gd&&gm&&!gm.contains(e.target))gd.classList.remove('show');const ud=document.getElementById('userDropdown'),um=document.querySelector('.user-menu');if(ud&&um&&!um.contains(e.target))ud.classList.remove('show')});
+    window.addEventListener('DOMContentLoaded',checkUserSession);
+    function toggleDarkLight(){
+      var b=document.body,i=document.getElementById('modeIcon');
+      b.classList.toggle('light-mode');
+      if(b.classList.contains('light-mode')){
+        i.innerHTML='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        localStorage.setItem('mmobase-theme','light');
+      }else{
+        i.innerHTML='<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+        localStorage.setItem('mmobase-theme','dark');
+      }
+    }
+    function initTheme(){
+      var saved=localStorage.getItem('mmobase-theme');
+      if(saved==='light'){
+        document.body.classList.add('light-mode');
+        var i=document.getElementById('modeIcon');
+        if(i) i.innerHTML='<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      }
+    }
+    initTheme();
+
+    // Randomise demo data on each load
+    function randomise() {
+      function rNum(min, max) { return Math.floor(Math.random() * (max - min + 1)) + min; }
+      function rDec(min, max, dec) { return (Math.random() * (max - min) + min).toFixed(dec); }
+      function fmt(n) { return n.toString().replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+
+      // Character SP
+      var sp = rNum(80000000, 160000000);
+      var spEls = document.querySelectorAll('.stat-val.sp');
+      if (spEls[0]) spEls[0].textContent = fmt(sp);
+
+      // Wallet balance
+      var walletB = rDec(15, 45, 1);
+      var walletEls = document.querySelectorAll('.wallet-balance');
+      walletEls.forEach(function(el) { el.textContent = walletB + 'B ISK'; });
+
+      // Wallet change today
+      var walletChg = rNum(80, 420);
+      var walletChgEls = document.querySelectorAll('.wallet-change');
+      walletChgEls.forEach(function(el) { el.textContent = '+' + walletChg + 'M today'; });
+
+      // Assets total
+      var assetsB = rDec(12, 40, 1);
+      var assetEls = document.querySelectorAll('.assets-total');
+      assetEls.forEach(function(el) { el.textContent = assetsB + 'B ISK'; });
+
+      // Skill queue progress
+      var skillProg = rNum(10, 95);
+      var progBars = document.querySelectorAll('.training-bar-fill');
+      progBars.forEach(function(el) { el.style.width = skillProg + '%'; });
+
+      // Skill time remaining
+      var skillDays = rNum(1, 28);
+      var skillHrs = rNum(0, 23);
+      var skillMins = rNum(0, 59);
+      var trainTimeEls = document.querySelectorAll('.training-time');
+      trainTimeEls.forEach(function(el) { el.textContent = skillDays + 'd ' + skillHrs + 'h ' + skillMins + 'm'; });
+
+      // Transaction amounts
+      var txAmounts = document.querySelectorAll('.tx-amount');
+      txAmounts.forEach(function(el) {
+        if (el.classList.contains('positive')) {
+          var amt = rDec(5, 140, 1);
+          el.textContent = '+' + amt + 'M';
+        } else if (el.classList.contains('negative')) {
+          var amt = rDec(0.4, 3, 1);
+          el.textContent = '-' + amt + 'M';
+        }
+      });
+
+      // Market prices - randomise slightly
+      var mktPrices = document.querySelectorAll('.market-price, .mkt-watch-sell, .mkt-watch-buy');
+      mktPrices.forEach(function(el) {
+        var text = el.textContent;
+        if (text.indexOf('B') > -1) {
+          var base = parseFloat(text);
+          var newVal = (base * (0.9 + Math.random() * 0.2)).toFixed(2);
+          el.textContent = newVal + 'B';
+        } else if (text.indexOf('M') > -1) {
+          var base = parseFloat(text);
+          var newVal = (base * (0.9 + Math.random() * 0.2)).toFixed(2);
+          el.textContent = newVal + 'M';
+        } else if (text.indexOf(',') > -1) {
+          var base = parseInt(text.replace(/,/g, ''));
+          var newVal = Math.floor(base * (0.9 + Math.random() * 0.2));
+          el.textContent = fmt(newVal);
+        }
+      });
+
+      // Market changes
+      var mktChgs = document.querySelectorAll('.market-chg, .mkt-watch-chg, .mover-chg, .market-item-change');
+      mktChgs.forEach(function(el) {
+        var pct = rDec(-5, 8, 1);
+        if (parseFloat(pct) >= 0) {
+          el.textContent = '+' + Math.abs(pct) + '%';
+          el.className = el.className.replace('down', 'up');
+          if (!el.classList.contains('up')) el.classList.add('up');
+        } else {
+          el.textContent = pct + '%';
+          el.className = el.className.replace('up', 'down');
+          if (!el.classList.contains('down')) el.classList.add('down');
+        }
+      });
+
+      // Wealth chart bars - randomise heights
+      var wealthBars = document.querySelectorAll('.wealth-bar');
+      wealthBars.forEach(function(el, i) {
+        var baseHeight = 30 + (i / wealthBars.length) * 50;
+        var randomOffset = (Math.random() - 0.5) * 15;
+        el.style.height = Math.max(10, Math.min(95, baseHeight + randomOffset)) + '%';
+      });
+
+      // Wealth stats
+      var netWorth = (parseFloat(walletB) + parseFloat(assetsB)).toFixed(1);
+      var wealthVals = document.querySelectorAll('.wealth-stat-value');
+      wealthVals.forEach(function(el) {
+        if (el.textContent.indexOf('B') > -1 && el.textContent.indexOf('+') === -1) {
+          el.textContent = netWorth + 'B';
+        } else if (el.textContent.indexOf('+') > -1 && el.textContent.indexOf('B') > -1) {
+          el.textContent = '+' + rDec(0.5, 8, 1) + 'B';
+        }
+      });
+
+      // Today's summary values
+      var summaryVals = document.querySelectorAll('#tab-overview .stat-val.isk');
+      summaryVals.forEach(function(el) {
+        var val = rDec(10, 300, 1);
+        if (el.textContent.indexOf('-') > -1) {
+          el.textContent = '-' + rDec(0.5, 5, 1) + 'M';
+        } else {
+          el.textContent = '+' + val + 'M';
+        }
+      });
+
+      // PLEX count
+      var plex = rNum(100, 1000);
+      document.querySelectorAll('.stat-val').forEach(function(el) {
+        if (el.textContent === '500') el.textContent = plex.toString();
+      });
+
+      // Security status
+      document.querySelectorAll('.stat-val').forEach(function(el) {
+        if (el.textContent === '2.4') el.textContent = rDec(-2, 5, 1);
+      });
+    }
+    randomise();
+  </script>
+
+  <!-- COOKIE CONSENT BANNER -->
+  <div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;width:100%;background:rgba(10,14,23,0.98);border-top:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(12px);padding:18px 48px;z-index:99999;font-family:Inter,sans-serif;">
+    <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;">
+      <p style="font-size:13px;color:#8892a6;margin:0;flex:1;line-height:1.6;min-width:280px;">We use cookies to keep you signed in and remember your preferences. No tracking, no ads. See our <a href="/privacy-policy" style="color:#00b4d8;text-decoration:none;">Privacy Policy</a> for details.</p>
+      <div style="display:flex;gap:10px;flex-shrink:0;">
+        <button onclick="acceptCookies()" style="padding:8px 22px;background:#00b4d8;color:#000;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;">Accept</button>
+        <button onclick="declineCookies()" style="padding:8px 22px;background:transparent;color:#8892a6;border:1px solid rgba(255,255,255,0.15);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;">Decline</button>
+      </div>
+    </div>
+  </div>
+  <style>
+    #cookieBanner.show{display:block !important;animation:slideUpCookie 0.4s ease}
+    @keyframes slideUpCookie{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    @keyframes slideDownCookie{from{transform:translateY(0);opacity:1}to{transform:translateY(100%);opacity:0}}
+    body.light-mode #cookieBanner{background:rgba(240,242,245,0.98);border-top-color:rgba(0,0,0,0.08)}
+    body.light-mode #cookieBanner p{color:#555}
+    body.light-mode #cookieBanner button:last-child{color:#666;border-color:rgba(0,0,0,0.15)}
+    @media(max-width:700px){#cookieBanner>div{flex-direction:column;gap:12px}#cookieBanner{padding:16px 20px}}
+    </style>
+  <script>
+    function acceptCookies(){localStorage.setItem('mmobase-cookies','accepted');closeCookieBanner()}
+    function declineCookies(){localStorage.setItem('mmobase-cookies','declined');closeCookieBanner()}
+    function closeCookieBanner(){var b=document.getElementById('cookieBanner');b.style.animation='slideDownCookie 0.3s ease forwards';setTimeout(function(){b.remove()},300)}
+    (function(){if(!localStorage.getItem('mmobase-cookies')){setTimeout(function(){document.getElementById('cookieBanner').classList.add('show')},1000)}})();
+  </script>
+
+
+  <!-- TOAST NOTIFICATION SYSTEM -->
+  <style>
+    .mmobase-toast{position:fixed;left:24px;bottom:12px;padding:14px 22px;border-radius:10px;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;z-index:100000;display:flex;align-items:center;gap:10px;max-width:380px;line-height:1.5;animation:toastSlideIn 0.4s ease;box-shadow:0 8px 32px rgba(0,0,0,0.25)}
+    .mmobase-toast.success{background:#0d2818;border:1px solid rgba(34,197,94,0.2);color:#4ade80}
+    .mmobase-toast.error{background:#2a0a0a;border:1px solid rgba(239,68,68,0.2);color:#f87171}
+    .mmobase-toast.info{background:#0a1628;border:1px solid rgba(0,180,216,0.2);color:#67d4e8}
+    .mmobase-toast.hiding{animation:toastSlideOut 0.3s ease forwards}
+    body.light-mode .mmobase-toast.success{background:#f0fdf4;border-color:rgba(34,197,94,0.3);color:#15803d}
+    body.light-mode .mmobase-toast.error{background:#fef2f2;border-color:rgba(239,68,68,0.3);color:#b91c1c}
+    body.light-mode .mmobase-toast.info{background:#f0f9ff;border-color:rgba(0,180,216,0.3);color:#0369a1}
+    @keyframes toastSlideIn{from{transform:translateX(-120%);opacity:0}to{transform:translateX(0);opacity:1}}
+    @keyframes toastSlideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(-120%);opacity:0}}
+    @media(max-width:700px){.mmobase-toast{left:12px;right:12px;max-width:none;bottom:80px}}
+    </style>
+  <script>
+    function showToast(message, type, options) {
+      type = type || 'info';
+      options = options || {};
+
+      var existing = document.querySelectorAll('.mmobase-toast');
+      existing.forEach(function(t){t.remove()});
+
+      var icons = {success:'\u2713',error:'\u2715',info:'\u2139',loading:'\u21BB'};
+      var toast = document.createElement('div');
+      toast.className = 'mmobase-toast ' + (type === 'loading' ? 'info' : type);
+      toast.innerHTML = '<span style="font-size:16px;font-weight:700;">' + (icons[type] || icons.info) + '</span><span>' + message + '</span>';
+      document.body.appendChild(toast);
+
+      // Sticky toasts stay visible until the next toast replaces them.
+      // Used while the dashboard is still fetching ESI/API data.
+      if (options.sticky) return toast;
+
+      var duration = options.duration || 4000;
+      setTimeout(function(){
+        toast.classList.add('hiding');
+        setTimeout(function(){toast.remove()},300);
+      }, duration);
+
+      return toast;
+    }
+  </script>
+
+
+  <script>
+    // v68 MMOBASE Notes: browser-local first version. Database sync can be added later.
+    // v70: New notes are displayed oldest-first so the newest note appears at the bottom.
+    // v72: Notes can be pinned to the top while unpinned notes remain oldest-first.
+    (function(){
+      var NOTES_KEY = 'mmobase.realDashboard.notes.v1';
+      var SELECTED_KEY = 'mmobase.realDashboard.notes.selected.v1';
+      var state = { notes: [], selectedId: null, saveTimer: null };
+
+      function nowIso(){ return new Date().toISOString(); }
+      function uid(){ return 'note-' + Date.now().toString(36) + '-' + Math.random().toString(36).slice(2,8); }
+
+      function getStoredNotes(){
+        try {
+          var raw = localStorage.getItem(NOTES_KEY);
+          var parsed = raw ? JSON.parse(raw) : [];
+          return Array.isArray(parsed) ? parsed : [];
+        } catch(e) {
+          return [];
+        }
+      }
+
+      function saveNotes(){
+        localStorage.setItem(NOTES_KEY, JSON.stringify(state.notes));
+        if (state.selectedId) localStorage.setItem(SELECTED_KEY, state.selectedId);
+        mmobaseNotesSetStatus('Saved');
+      }
+
+      function scheduleSave(){
+        mmobaseNotesSetStatus('Saving...');
+        clearTimeout(state.saveTimer);
+        state.saveTimer = setTimeout(saveNotes, 250);
+      }
+
+      function formatDate(value){
+        if (!value) return '';
+        var d = new Date(value);
+        if (isNaN(d.getTime())) return '';
+        return d.toLocaleString([], { month:'short', day:'numeric', hour:'2-digit', minute:'2-digit' });
+      }
+
+      function selectedNote(){
+        return state.notes.find(function(n){ return n.id === state.selectedId; }) || null;
+      }
+
+      function cleanPreview(text){
+        text = (text || '').replace(/\s+/g, ' ').trim();
+        return text || 'Empty note';
+      }
+
+      function wordCount(text){
+        var t = (text || '').trim();
+        if (!t) return '0 words';
+        return t.split(/\s+/).length + ' words';
+      }
+
+      function ensureSeedNote(){
+        if (state.notes.length) return;
+        var first = {
+          id: uid(),
+          title: 'New Note',
+          body: '',
+          createdAt: nowIso(),
+          updatedAt: nowIso()
+        };
+        state.notes.push(first);
+        state.selectedId = first.id;
+        saveNotes();
+      }
+
+      function loadState(){
+        state.notes = getStoredNotes();
+        state.selectedId = localStorage.getItem(SELECTED_KEY);
+        if (!state.notes.some(function(n){ return n.id === state.selectedId; })) {
+          state.selectedId = state.notes[0] ? state.notes[0].id : null;
+        }
+      }
+
+      window.mmobaseNotesInit = function(){
+        loadState();
+        if (!state.notes.length) {
+          // Start with no visible fake content; user can click New Note.
+          state.selectedId = null;
+        }
+        mmobaseNotesRender();
+      };
+
+      window.mmobaseNotesRender = function(){
+        loadState();
+
+        var grid = document.getElementById('notes-grid');
+        if (!grid) return;
+
+        var searchEl = document.getElementById('notes-search');
+        var query = searchEl ? searchEl.value.trim().toLowerCase() : '';
+
+        var notes = state.notes.slice().sort(function(a,b){
+          if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
+          return new Date(a.createdAt || a.updatedAt || 0) - new Date(b.createdAt || b.updatedAt || 0);
+        });
+
+        if (query) {
+          notes = notes.filter(function(n){
+            return ((n.title || '') + ' ' + (n.body || '')).toLowerCase().indexOf(query) !== -1;
+          });
+        }
+
+        var html = notes.map(function(n){
+          var active = n.id === state.selectedId ? ' active' : '';
+          return '<div class="note-tile' + active + '" onclick="mmobaseNotesSelect(\'' + n.id + '\')">' +
+            '<div class="note-tile-title">' + escapeHtml(n.title || 'Untitled Note') + (n.pinned ? '<span class="note-pin-badge">Pinned</span>' : '') + '</div>' +
+            '<div class="note-tile-preview">' + escapeHtml(cleanPreview(n.body)) + '</div>' +
+            '<div class="note-tile-meta"><span>' + escapeHtml(formatDate(n.updatedAt)) + '</span><span>' + escapeHtml(wordCount(n.body)) + '</span></div>' +
+          '</div>';
+        }).join('');
+
+        html += '<div class="note-tile note-new-tile" onclick="mmobaseNotesCreate()"><div><span>+</span>New Note</div></div>';
+        grid.innerHTML = html;
+
+        renderEditor();
+      };
+
+      function renderEditor(){
+        var note = selectedNote();
+        var title = document.getElementById('notes-title');
+        var body = document.getElementById('notes-body');
+        var updated = document.getElementById('notes-updated');
+
+        if (!title || !body || !updated) return;
+
+        if (!note) {
+          title.value = '';
+          body.value = '';
+          title.disabled = true;
+          body.disabled = true;
+          var pinBtn = document.getElementById('notes-pin-btn');
+          var pinLabel = document.getElementById('notes-pin-label');
+          if (pinBtn) {
+            pinBtn.classList.remove('is-pinned');
+            pinBtn.title = 'Pin note to top';
+            pinBtn.setAttribute('aria-label', 'Pin note to top');
+          }
+          if (pinLabel) pinLabel.textContent = 'Pin';
+          updated.textContent = 'No note selected';
+          mmobaseNotesSetStatus('');
+          return;
+        }
+
+        title.disabled = false;
+        body.disabled = false;
+        title.value = note.title || '';
+        body.value = note.body || '';
+        updated.textContent = (note.pinned ? 'Pinned • ' : '') + 'Updated ' + formatDate(note.updatedAt);
+        var pinBtn = document.getElementById('notes-pin-btn');
+        var pinLabel = document.getElementById('notes-pin-label');
+        if (pinBtn) {
+          pinBtn.classList.toggle('is-pinned', !!note.pinned);
+          pinBtn.title = note.pinned ? 'Unpin note' : 'Pin note to top';
+          pinBtn.setAttribute('aria-label', note.pinned ? 'Unpin note' : 'Pin note to top');
+        }
+        if (pinLabel) pinLabel.textContent = note.pinned ? 'Pinned' : 'Pin';
+        mmobaseNotesSetStatus('Saved');
+      }
+
+      window.mmobaseNotesCreate = function(){
+        loadState();
+        var note = {
+          id: uid(),
+          title: 'New Note',
+          body: '',
+          createdAt: nowIso(),
+          updatedAt: nowIso()
+        };
+        state.notes.push(note);
+        state.selectedId = note.id;
+        saveNotes();
+        mmobaseNotesRender();
+        setTimeout(function(){
+          var title = document.getElementById('notes-title');
+          if (title) { title.focus(); title.select(); }
+        }, 50);
+      };
+
+      window.mmobaseNotesSelect = function(id){
+        loadState();
+        state.selectedId = id;
+        localStorage.setItem(SELECTED_KEY, id);
+        mmobaseNotesRender();
+      };
+
+      window.mmobaseNotesUpdateTitle = function(value){
+        var note = selectedNote();
+        if (!note) return;
+        note.title = value || 'Untitled Note';
+        note.updatedAt = nowIso();
+        scheduleSave();
+        mmobaseNotesRenderTilesOnly();
+      };
+
+      window.mmobaseNotesUpdateBody = function(value){
+        var note = selectedNote();
+        if (!note) return;
+        note.body = value || '';
+        note.updatedAt = nowIso();
+        scheduleSave();
+        mmobaseNotesRenderTilesOnly();
+      };
+
+      window.mmobaseNotesRenderTilesOnly = function(){
+        var title = document.getElementById('notes-title');
+        var body = document.getElementById('notes-body');
+        var focusedId = document.activeElement ? document.activeElement.id : '';
+        var pos = null;
+        if ((focusedId === 'notes-title' || focusedId === 'notes-body') && document.activeElement.selectionStart !== undefined) {
+          pos = document.activeElement.selectionStart;
+        }
+
+        var grid = document.getElementById('notes-grid');
+        if (grid) {
+          var searchEl = document.getElementById('notes-search');
+          var query = searchEl ? searchEl.value.trim().toLowerCase() : '';
+          var notes = state.notes.slice().sort(function(a,b){
+          if (!!a.pinned !== !!b.pinned) return a.pinned ? -1 : 1;
+          return new Date(a.createdAt || a.updatedAt || 0) - new Date(b.createdAt || b.updatedAt || 0);
+        });
+          if (query) {
+            notes = notes.filter(function(n){
+              return ((n.title || '') + ' ' + (n.body || '')).toLowerCase().indexOf(query) !== -1;
+            });
+          }
+          grid.innerHTML = notes.map(function(n){
+            var active = n.id === state.selectedId ? ' active' : '';
+            return '<div class="note-tile' + active + '" onclick="mmobaseNotesSelect(\'' + n.id + '\')">' +
+              '<div class="note-tile-title">' + escapeHtml(n.title || 'Untitled Note') + (n.pinned ? '<span class="note-pin-badge">Pinned</span>' : '') + '</div>' +
+              '<div class="note-tile-preview">' + escapeHtml(cleanPreview(n.body)) + '</div>' +
+              '<div class="note-tile-meta"><span>' + escapeHtml(formatDate(n.updatedAt)) + '</span><span>' + escapeHtml(wordCount(n.body)) + '</span></div>' +
+            '</div>';
+          }).join('') + '<div class="note-tile note-new-tile" onclick="mmobaseNotesCreate()"><div><span>+</span>New Note</div></div>';
+        }
+
+        if (focusedId === 'notes-title' && title) { title.focus(); if (pos !== null) title.setSelectionRange(pos, pos); }
+        if (focusedId === 'notes-body' && body) { body.focus(); if (pos !== null) body.setSelectionRange(pos, pos); }
+      };
+
+      window.mmobaseNotesAskDelete = function(){
+        loadState();
+        var note = selectedNote();
+        if (!note) return;
+
+        var overlay = document.getElementById('notes-delete-overlay');
+        var name = document.getElementById('notes-delete-name');
+        if (name) name.textContent = '"' + (note.title || 'Untitled Note') + '"';
+        if (overlay) overlay.classList.add('show');
+      };
+
+      window.mmobaseNotesCancelDelete = function(event){
+        if (event && event.target && event.target.id !== 'notes-delete-overlay') return;
+        var overlay = document.getElementById('notes-delete-overlay');
+        if (overlay) overlay.classList.remove('show');
+      };
+
+      window.mmobaseNotesConfirmDelete = function(){
+        loadState();
+        var note = selectedNote();
+        if (!note) {
+          mmobaseNotesCancelDelete();
+          return;
+        }
+
+        state.notes = state.notes.filter(function(n){ return n.id !== note.id; });
+        state.selectedId = state.notes[0] ? state.notes[0].id : null;
+        saveNotes();
+        mmobaseNotesCancelDelete();
+        mmobaseNotesRender();
+      };
+
+      window.mmobaseNotesDelete = window.mmobaseNotesAskDelete;
+
+      window.mmobaseNotesTogglePin = function(){
+        loadState();
+        var note = selectedNote();
+        if (!note) return;
+        note.pinned = !note.pinned;
+        note.updatedAt = nowIso();
+        saveNotes();
+        mmobaseNotesRender();
+      };
+
+      window.mmobaseNotesDuplicate = function(){
+        loadState();
+        var note = selectedNote();
+        if (!note) return;
+        var copy = {
+          id: uid(),
+          title: (note.title || 'Untitled Note') + ' Copy',
+          body: note.body || '',
+          pinned: false,
+          createdAt: nowIso(),
+          updatedAt: nowIso()
+        };
+        state.notes.push(copy);
+        state.selectedId = copy.id;
+        saveNotes();
+        mmobaseNotesRender();
+      };
+
+      window.mmobaseNotesUseTemplate = function(type){
+        var templates = {
+          industry: {
+            title: 'Industry Plan',
+            body: 'Goal:\\n\\nMaterials needed:\\n- \\n- \\n\\nBuild location:\\n\\nJobs to start:\\n- \\n\\nNotes:\\n'
+          },
+          market: {
+            title: 'Market Watch',
+            body: 'Item:\\n\\nBuy price target:\\nSell price target:\\nCurrent location:\\n\\nReason to watch:\\n\\nNotes:\\n'
+          },
+          doctrine: {
+            title: 'Doctrine / Fit',
+            body: 'Ship:\\nRole:\\n\\nFit notes:\\nHigh:\\nMid:\\nLow:\\nRigs:\\nDrones:\\n\\nAmmo / charges:\\n\\nNotes:\\n'
+          },
+          todo: {
+            title: 'To-do List',
+            body: '- [ ] \\n- [ ] \\n- [ ] \\n\\nLater:\\n- [ ] \\n'
+          }
+        };
+        var t = templates[type];
+        if (!t) return;
+
+        var note = selectedNote();
+        if (!note) {
+          mmobaseNotesCreate();
+          note = selectedNote();
+        }
+        if (!note) return;
+
+        if ((note.body || '').trim() && !confirm('Replace this note with the template?')) return;
+
+        note.title = t.title;
+        note.body = t.body;
+        note.updatedAt = nowIso();
+        saveNotes();
+        mmobaseNotesRender();
+      };
+
+      window.mmobaseNotesSetStatus = function(text){
+        var status = document.getElementById('notes-status');
+        if (status) status.textContent = text || '';
+      };
+
+      function escapeHtml(value){
+        return String(value || '').replace(/[&<>"']/g, function(ch){
+          return ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#039;'})[ch];
+        });
+      }
+
+
+      document.addEventListener('keydown', function(e){
+        if (e.key === 'Escape') {
+          var overlay = document.getElementById('notes-delete-overlay');
+          if (overlay && overlay.classList.contains('show')) overlay.classList.remove('show');
+        }
+      });
+
+      document.addEventListener('DOMContentLoaded', function(){
+        mmobaseNotesInit();
+      });
+    })();
+  </script>
+
+<script src="/real-dashboard-polish-v54-auth-safe-loading-reset-20260519_2359.js?v=20260519_2359_v54"></script>
+
+  <script>
+    // v64 safe nav fix: one-shot repair only, no continuous watcher, no interval loop.
+    (function(){
+      function addTransparencyLinkOnce() {
+        var navs = document.querySelectorAll('header nav');
+        for (var i = 0; i < navs.length; i++) {
+          var nav = navs[i];
+          var links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+
+          var donations = links.find(function(a) {
+            var href = a.getAttribute('href') || '';
+            return href === 'donations' || href === '/donations' || href === 'donations.html' || href === '/donations.html';
+          });
+
+          if (!donations) continue;
+
+          var transparency = links.find(function(a) {
+            var href = a.getAttribute('href') || '';
+            return href === 'transparency' || href === '/transparency' || href === 'transparency.html' || href === '/transparency.html';
+          });
+
+          if (!transparency) {
+            transparency = document.createElement('a');
+            transparency.href = 'transparency';
+            transparency.textContent = 'Transparency';
+          } else {
+            transparency.textContent = 'Transparency';
+          }
+
+          if (transparency.nextElementSibling !== donations) {
+            nav.insertBefore(transparency, donations);
+          }
+        }
+      }
+
+      window.addTransparencyLinkOnce = addTransparencyLinkOnce;
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', addTransparencyLinkOnce);
+      } else {
+        addTransparencyLinkOnce();
+      }
+
+      window.addEventListener('load', function() {
+        addTransparencyLinkOnce();
+        setTimeout(addTransparencyLinkOnce, 300);
+        setTimeout(addTransparencyLinkOnce, 1200);
+        setTimeout(addTransparencyLinkOnce, 2500);
+      });
+    })();
+  </script>
+
+</body>
+</html>

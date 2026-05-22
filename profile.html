@@ -1,0 +1,807 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Profile - MMOBASE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @media (max-height: 860px) { body { zoom: 0.84 !important; } }
+    @media (max-height: 700px) { body { zoom: 0.78 !important; } }
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { background: #0a0e17; color: #ffffff; overflow-x: hidden; min-height: 100vh; }
+
+    /* NAVBAR */
+    header {
+      position: fixed; top: 0; width: 100%; padding: 20px 48px;
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 9999; background: rgba(10, 14, 23, 0.98);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .logo { font-weight: 700; font-size: 20px; letter-spacing: 0.5px; }
+    nav { display: flex; align-items: center; }
+    nav a { color: #cccccc; text-decoration: none; margin-left: 28px; font-size: 15px; transition: color 0.2s ease; }
+    nav a:hover { color: white; }
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    .nav-cta { padding: 10px 18px; background: white; color: black; border-radius: 10px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    .mode-toggle { background: transparent; border: none; padding: 0; cursor: pointer; margin-left: 14px; transition: color 0.2s ease; color: #cccccc; }
+    .mode-toggle:hover { color: white; }
+    .mode-toggle svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; vertical-align: middle; }
+    .user-menu { position: relative; display: inline-block; }
+    .user-dropdown { display: none; position: absolute; top: calc(100% + 8px); left: 0; background: white; border-radius: 10px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); min-width: 160px; overflow: hidden; z-index: 1000; }
+    .user-dropdown.show { display: block; }
+    .user-dropdown a { display: block; padding: 10px 16px; color: #1a1a1a; text-decoration: none; font-size: 13px; margin: 0; }
+    .user-dropdown a:hover { background: rgba(0, 180, 216, 0.08); }
+    .user-dropdown hr { margin: 4px 0; border: none; border-top: 1px solid rgba(0, 0, 0, 0.06); }
+
+    /* PROFILE LAYOUT */
+    .profile-container {
+      max-width: 1000px;
+      margin: 0 auto;
+      padding: 100px 32px 60px;
+    }
+
+    /* PROFILE HEADER - Steam style banner */
+    .profile-header {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 16px;
+      padding: 32px;
+      display: flex;
+      gap: 28px;
+      align-items: flex-start;
+      margin-bottom: 24px;
+    }
+
+    /* Profile Picture */
+    .profile-avatar-container {
+      flex-shrink: 0;
+    }
+    .profile-avatar {
+      width: 120px;
+      height: 120px;
+      border-radius: 12px;
+      background: rgba(255,255,255,0.04);
+      border: 2px solid rgba(255,255,255,0.08);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 48px;
+      color: #555;
+      cursor: pointer;
+      transition: all 0.2s;
+      overflow: hidden;
+      position: relative;
+    }
+    .profile-avatar:hover {
+      border-color: #00b4d8;
+    }
+    .profile-avatar img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+    .profile-avatar-overlay {
+      position: absolute;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(0,0,0,0.7);
+      padding: 4px;
+      font-size: 10px;
+      text-align: center;
+      color: #ccc;
+      opacity: 0;
+      transition: opacity 0.2s;
+    }
+    .profile-avatar:hover .profile-avatar-overlay {
+      opacity: 1;
+    }
+
+    /* Profile Info */
+    .profile-info {
+      flex: 1;
+    }
+    .profile-display-name {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 2px;
+    }
+    .profile-gamertag {
+      font-size: 14px;
+      color: #00b4d8;
+      margin-bottom: 12px;
+    }
+    .profile-bio {
+      font-size: 14px;
+      color: #8892a6;
+      line-height: 1.6;
+      margin-bottom: 16px;
+      max-width: 500px;
+    }
+    .profile-bio-empty {
+      font-size: 13px;
+      color: #555;
+      font-style: italic;
+      cursor: pointer;
+    }
+    .profile-bio-empty:hover {
+      color: #00b4d8;
+    }
+    .profile-meta {
+      display: flex;
+      gap: 24px;
+      flex-wrap: wrap;
+    }
+    .profile-meta-item {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      font-size: 12px;
+      color: #666;
+    }
+    .profile-meta-item svg {
+      width: 14px;
+      height: 14px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+    }
+
+    /* Edit Profile Button */
+    .profile-edit-btn {
+      padding: 8px 18px;
+      background: transparent;
+      color: #8892a6;
+      border: 1px solid rgba(255,255,255,0.12);
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+      flex-shrink: 0;
+      align-self: flex-start;
+    }
+    .profile-edit-btn:hover {
+      border-color: #00b4d8;
+      color: #00b4d8;
+    }
+
+    /* PROFILE BODY - Two columns */
+    .profile-body {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 24px;
+    }
+
+    /* Profile Cards */
+    .profile-card {
+      background: rgba(255,255,255,0.02);
+      border: 1px solid rgba(255,255,255,0.06);
+      border-radius: 12px;
+      padding: 24px;
+    }
+    .profile-card h2 {
+      font-size: 16px;
+      font-weight: 700;
+      margin-bottom: 16px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .profile-card h2 svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      color: #00b4d8;
+    }
+
+    /* Account Info Card */
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .info-row:last-child {
+      border-bottom: none;
+    }
+    .info-label {
+      font-size: 13px;
+      color: #666;
+    }
+    .info-value {
+      font-size: 13px;
+      font-weight: 600;
+      color: #ccc;
+    }
+
+    /* Games Card */
+    .game-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 0;
+      border-bottom: 1px solid rgba(255,255,255,0.04);
+    }
+    .game-item:last-child {
+      border-bottom: none;
+    }
+    .game-icon {
+      width: 36px;
+      height: 36px;
+      border-radius: 8px;
+      object-fit: cover;
+    }
+    .game-name {
+      font-size: 14px;
+      font-weight: 600;
+    }
+    .game-status {
+      font-size: 11px;
+      color: #666;
+    }
+    .game-status.active {
+      color: #4ade80;
+    }
+
+    /* Bio Edit Modal */
+    .bio-modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: rgba(0,0,0,0.7);
+      backdrop-filter: blur(8px);
+      z-index: 10001;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .bio-modal-overlay.active {
+      display: flex;
+    }
+    .bio-modal {
+      background: #1a1f2e;
+      border-radius: 16px;
+      padding: 32px;
+      width: 100%;
+      max-width: 480px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+    }
+    .bio-modal h3 {
+      font-size: 18px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+    .bio-textarea {
+      width: 100%;
+      height: 100px;
+      padding: 12px 14px;
+      background: rgba(255,255,255,0.04);
+      border: 1px solid rgba(255,255,255,0.1);
+      border-radius: 8px;
+      color: #fff;
+      font-size: 14px;
+      font-family: 'Inter', sans-serif;
+      resize: vertical;
+      margin-bottom: 6px;
+    }
+    .bio-textarea:focus {
+      outline: none;
+      border-color: #00b4d8;
+    }
+    .bio-char-count {
+      font-size: 11px;
+      color: #555;
+      text-align: right;
+      margin-bottom: 16px;
+    }
+    .bio-modal-btns {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+    }
+    .bio-modal-btns button {
+      padding: 8px 20px;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      border: none;
+    }
+    .bio-save-btn {
+      background: #00b4d8;
+      color: #000;
+    }
+    .bio-cancel-btn {
+      background: transparent;
+      color: #8892a6;
+      border: 1px solid rgba(255,255,255,0.12) !important;
+    }
+
+    /* FOOTER */
+    footer {
+      padding: 30px 48px; border-top: 1px solid rgba(255,255,255,0.05);
+      text-align: center; color: #666; font-size: 13px;
+      margin-top: 40px;
+    }
+    footer a { color: #6b8aff; text-decoration: none; margin: 0 6px; }
+    footer a:hover { text-decoration: underline; }
+
+    /* LIGHT MODE */
+    body.light-mode { background: #f0f2f5; color: #1a1a1a; }
+    body.light-mode header { background: rgba(240, 242, 245, 0.98); border-bottom-color: rgba(0,0,0,0.08); }
+    body.light-mode nav a { color: #666; }
+    body.light-mode nav a:hover { color: #1a1a1a; }
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    body.light-mode .logo { color: #1a1a1a; }
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    body.light-mode .nav-cta { background: #1a1a1a; color: white; }
+    body.light-mode .mode-toggle { color: #666; }
+    body.light-mode .mode-toggle:hover { color: #1a1a1a; }
+    body.light-mode .profile-header { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }
+    body.light-mode .profile-avatar { background: rgba(0,0,0,0.04); border-color: rgba(0,0,0,0.1); }
+    body.light-mode .profile-display-name { color: #1a1a1a; }
+    body.light-mode .profile-bio { color: #666; }
+    body.light-mode .profile-bio-empty { color: #999; }
+    body.light-mode .profile-meta-item { color: #999; }
+    body.light-mode .profile-edit-btn { color: #666; border-color: rgba(0,0,0,0.12); }
+    body.light-mode .profile-edit-btn:hover { color: #00b4d8; border-color: #00b4d8; }
+    body.light-mode .profile-card { background: rgba(0,0,0,0.02); border-color: rgba(0,0,0,0.06); }
+    body.light-mode .profile-card h2 { color: #1a1a1a; }
+    body.light-mode .info-row { border-bottom-color: rgba(0,0,0,0.04); }
+    body.light-mode .info-label { color: #999; }
+    body.light-mode .info-value { color: #333; }
+    body.light-mode .game-item { border-bottom-color: rgba(0,0,0,0.04); }
+    body.light-mode .game-status { color: #999; }
+    body.light-mode .bio-modal { background: #ffffff; }
+    body.light-mode .bio-textarea { background: rgba(0,0,0,0.03); border-color: rgba(0,0,0,0.1); color: #1a1a1a; }
+    body.light-mode .bio-cancel-btn { color: #666; border-color: rgba(0,0,0,0.12) !important; }
+    body.light-mode footer { border-top-color: rgba(0,0,0,0.08); color: #888; }
+
+    @media (max-width: 768px) {
+      header { padding: 16px 24px; }
+      .profile-container { padding: 90px 16px 40px; }
+      .profile-header { flex-direction: column; align-items: center; text-align: center; }
+      .profile-meta { justify-content: center; }
+      .profile-body { grid-template-columns: 1fr; }
+      .profile-avatar { width: 100px; height: 100px; font-size: 40px; }
+      .profile-display-name { font-size: 24px; }
+    }
+  </style>
+  <link rel="icon" type="image/png" href="/favicon.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V431CY30BX"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-V431CY30BX");</script>
+</head>
+<body>
+<!-- MMOBASE BUILD transparency-v67-dropdown-html-route-fix-20260520_0232 -->
+<header>
+    <div class="logo">MMOBASE</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="transparency">Transparency</a>
+      <a href="/donations">Donations</a>
+      <div class="user-menu">
+        <a href="#" class="nav-cta" id="authButton" onclick="handleAuthClick(event)">Get Started</a>
+        <div class="user-dropdown" id="userDropdown">
+          <a href="profile.html">Profile</a>
+          <a href="settings.html">Settings</a>
+          <hr>
+          <a href="#" onclick="handleSignOut(event)">Sign Out</a>
+        </div>
+      </div>
+      <button class="mode-toggle" id="modeToggle" onclick="toggleDarkLight()" title="Toggle light/dark mode"><svg id="modeIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+    </nav>
+  </header>
+
+  <div class="profile-container">
+
+    <!-- PROFILE HEADER -->
+    <div class="profile-header">
+      <div class="profile-avatar-container">
+        <div class="profile-avatar" onclick="document.getElementById('avatarUpload').click()">
+          <span id="avatarPlaceholder">👤</span>
+          <img id="avatarImage" style="display:none;">
+          <div class="profile-avatar-overlay">Change</div>
+        </div>
+        <input type="file" id="avatarUpload" accept="image/*" style="display:none;" onchange="handleAvatarUpload(this)">
+      </div>
+
+      <div class="profile-info">
+        <div class="profile-display-name" id="profileDisplayName">Loading...</div>
+        <div class="profile-gamertag" id="profileGamertag">@user</div>
+        <div class="profile-bio" id="profileBio">
+          <span class="profile-bio-empty" onclick="openBioModal()">Click to add a bio...</span>
+        </div>
+        <div class="profile-meta">
+          <div class="profile-meta-item">
+            <svg viewBox="0 0 24 24"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg>
+            <span id="profileJoinDate">Member since —</span>
+          </div>
+        </div>
+      </div>
+
+      <button class="profile-edit-btn" onclick="openBioModal()">Edit Profile</button>
+    </div>
+
+    <!-- PROFILE BODY -->
+    <div class="profile-body">
+
+
+
+      <!-- Games -->
+      <div style="max-width:400px;">
+        <div class="profile-card" style="margin-bottom:24px;">
+          <h2>
+            <svg viewBox="0 0 24 24"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
+            Games
+          </h2>
+          <div class="game-item">
+            <img src="/evelogo.jpg" class="game-icon">
+            <div>
+              <div class="game-name">EVE Online</div>
+              <div class="game-status" id="eveGameStatus">Not connected</div>
+            </div>
+          </div>
+          <div class="game-item">
+            <img src="/osrslogo.jpg" class="game-icon">
+            <div>
+              <div class="game-name">Old School RuneScape</div>
+              <div class="game-status">Coming soon</div>
+            </div>
+          </div>
+          <div class="game-item">
+            <img src="/wowlogo.jpg" class="game-icon">
+            <div>
+              <div class="game-name">World of Warcraft</div>
+              <div class="game-status">Coming soon</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- BIO EDIT MODAL -->
+  <div class="bio-modal-overlay" id="bioModal" onclick="if(event.target===this)closeBioModal()">
+    <div class="bio-modal">
+      <h3>Edit Profile</h3>
+      <label style="display:block;font-size:13px;font-weight:600;color:#ccc;margin-bottom:8px;">Display Name</label>
+      <input type="text" id="editDisplayName" class="bio-textarea" style="height:auto;resize:none;margin-bottom:16px;" placeholder="Your display name">
+      <label style="display:block;font-size:13px;font-weight:600;color:#ccc;margin-bottom:8px;">Gamertag</label>
+      <input type="text" id="editGamertag" class="bio-textarea" style="height:auto;resize:none;margin-bottom:6px;" placeholder="@yourgamertag">
+      <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+        <button type="button" onclick="checkGamertagAvailability()" style="padding:6px 14px;background:transparent;color:#00b4d8;border:1px solid rgba(0,180,216,0.3);border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;transition:all 0.2s;">Check Availability</button>
+        <span id="gamertagStatus" style="font-size:12px;"></span>
+      </div>
+      <label style="display:block;font-size:13px;font-weight:600;color:#ccc;margin-bottom:8px;">Bio</label>
+      <textarea class="bio-textarea" id="editBio" placeholder="Tell us about yourself..." maxlength="200" oninput="updateCharCount()"></textarea>
+      <div class="bio-char-count"><span id="bioCharCount">0</span>/200</div>
+      <div class="bio-modal-btns">
+        <button class="bio-cancel-btn" onclick="closeBioModal()">Cancel</button>
+        <button class="bio-save-btn" onclick="saveProfile()">Save</button>
+      </div>
+    </div>
+  </div>
+
+  <footer>
+    <p>&copy; 2026 MMOBASE. All rights reserved. |
+      <a href="/terms-of-service">Terms of Service</a> |
+      <a href="/privacy-policy">Privacy Policy</a>
+    </p>
+  </footer>
+
+  <!-- TOAST NOTIFICATION SYSTEM -->
+  <style>
+    .mmobase-toast{position:fixed;left:24px;bottom:12px;padding:14px 22px;border-radius:10px;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;z-index:100000;display:flex;align-items:center;gap:10px;max-width:380px;line-height:1.5;animation:toastSlideIn 0.4s ease;box-shadow:0 8px 32px rgba(0,0,0,0.25)}
+    .mmobase-toast.success{background:#0d2818;border:1px solid rgba(34,197,94,0.2);color:#4ade80}
+    .mmobase-toast.error{background:#2a0a0a;border:1px solid rgba(239,68,68,0.2);color:#f87171}
+    .mmobase-toast.info{background:#0a1628;border:1px solid rgba(0,180,216,0.2);color:#67d4e8}
+    .mmobase-toast.hiding{animation:toastSlideOut 0.3s ease forwards}
+    body.light-mode .mmobase-toast.success{background:#f0fdf4;border-color:rgba(34,197,94,0.3);color:#15803d}
+    body.light-mode .mmobase-toast.error{background:#fef2f2;border-color:rgba(239,68,68,0.3);color:#b91c1c}
+    body.light-mode .mmobase-toast.info{background:#f0f9ff;border-color:rgba(0,180,216,0.3);color:#0369a1}
+    @keyframes toastSlideIn{from{transform:translateX(-120%);opacity:0}to{transform:translateX(0);opacity:1}}
+    @keyframes toastSlideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(-120%);opacity:0}}
+    @media(max-width:700px){.mmobase-toast{left:12px;right:12px;max-width:none;bottom:80px}}
+  </style>
+  <script>
+    function showToast(message, type) {
+      type = type || 'info';
+      var existing = document.querySelectorAll('.mmobase-toast');
+      existing.forEach(function(t){t.remove()});
+      var icons = {success:'\u2713',error:'\u2715',info:'\u2139'};
+      var toast = document.createElement('div');
+      toast.className = 'mmobase-toast ' + type;
+      toast.innerHTML = '<span style="font-size:16px;font-weight:700;">' + icons[type] + '</span><span>' + message + '</span>';
+      document.body.appendChild(toast);
+      setTimeout(function(){toast.classList.add('hiding');setTimeout(function(){toast.remove()},300)},4000);
+    }
+  </script>
+
+  <!-- COOKIE CONSENT BANNER -->
+  <div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;width:100%;background:rgba(10,14,23,0.98);border-top:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(12px);padding:18px 48px;z-index:99999;font-family:Inter,sans-serif;">
+    <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;">
+      <p style="font-size:13px;color:#8892a6;margin:0;flex:1;line-height:1.6;min-width:280px;">We use cookies to keep you signed in and remember your preferences. No tracking, no ads. See our <a href="/privacy-policy" style="color:#00b4d8;text-decoration:none;">Privacy Policy</a> for details.</p>
+      <div style="display:flex;gap:10px;flex-shrink:0;">
+        <button onclick="acceptCookies()" style="padding:8px 22px;background:#00b4d8;color:#000;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;">Accept</button>
+        <button onclick="declineCookies()" style="padding:8px 22px;background:transparent;color:#8892a6;border:1px solid rgba(255,255,255,0.15);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;">Decline</button>
+      </div>
+    </div>
+  </div>
+  <style>
+    #cookieBanner.show{display:block !important;animation:slideUpCookie 0.4s ease}
+    @keyframes slideUpCookie{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    @keyframes slideDownCookie{from{transform:translateY(0);opacity:1}to{transform:translateY(100%);opacity:0}}
+    body.light-mode #cookieBanner{background:rgba(240,242,245,0.98);border-top-color:rgba(0,0,0,0.08)}
+    body.light-mode #cookieBanner p{color:#555}
+    body.light-mode #cookieBanner button:last-child{color:#666;border-color:rgba(0,0,0,0.15)}
+    @media(max-width:700px){#cookieBanner>div{flex-direction:column;gap:12px}#cookieBanner{padding:16px 20px}}
+  </style>
+  <script>
+    function acceptCookies(){localStorage.setItem('mmobase-cookies','accepted');closeCookieBanner()}
+    function declineCookies(){localStorage.setItem('mmobase-cookies','declined');closeCookieBanner()}
+    function closeCookieBanner(){var b=document.getElementById('cookieBanner');b.style.animation='slideDownCookie 0.3s ease forwards';setTimeout(function(){b.remove()},300)}
+    (function(){if(!localStorage.getItem('mmobase-cookies')){setTimeout(function(){document.getElementById('cookieBanner').classList.add('show')},1000)}})();
+  </script>
+
+  <script>
+    // PROFILE PAGE LOGIC
+    function openBioModal() {
+      document.getElementById('bioModal').classList.add('active');
+      var saved = JSON.parse(localStorage.getItem('mmobase-profile') || '{}');
+      document.getElementById('editDisplayName').value = saved.displayName || '';
+      document.getElementById('editGamertag').value = saved.gamertag || '';
+      document.getElementById('editBio').value = saved.bio || '';
+      updateCharCount();
+    }
+
+    function closeBioModal() { var gs=document.getElementById('gamertagStatus'); if(gs) gs.innerHTML='';
+      document.getElementById('bioModal').classList.remove('active');
+    }
+
+    function updateCharCount() {
+      var count = document.getElementById('editBio').value.length;
+      document.getElementById('bioCharCount').textContent = count;
+    }
+
+    async function checkGamertagAvailability() {
+      var gamertag = document.getElementById('editGamertag').value.trim();
+      var statusEl = document.getElementById('gamertagStatus');
+      if (!gamertag) { statusEl.innerHTML = '<span style="color:#f87171;">Please enter a gamertag</span>'; return; }
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (!session) return;
+      const { data } = await supabaseClient.from('profiles').select('id').eq('gamertag', gamertag).single();
+      if (data && data.id !== session.user.id) {
+        statusEl.innerHTML = '<span style="color:#f87171;">Taken</span>';
+      } else {
+        statusEl.innerHTML = '<span style="color:#4ade80;">Available</span>';
+      }
+    }
+
+    async function saveProfile() {
+      var displayName = document.getElementById('editDisplayName').value.trim();
+      var gamertag = document.getElementById('editGamertag').value.trim();
+      var bio = document.getElementById('editBio').value.trim();
+
+      // Update Supabase auth + profiles table
+      try {
+        const { data: { session } } = await supabaseClient.auth.getSession();
+        if (!session) { showToast('You must be logged in.', 'error'); return; }
+
+        if (displayName) {
+          await supabaseClient.auth.updateUser({ data: { full_name: displayName } });
+        }
+
+        var updateData = { updated_at: new Date().toISOString() };
+        if (displayName) updateData.display_name = displayName;
+        if (bio) updateData.bio = bio;
+        if (gamertag) updateData.gamertag = gamertag;
+
+        const { error } = await supabaseClient
+          .from('profiles')
+          .update(updateData)
+          .eq('id', session.user.id);
+
+        if (error) { if (error.message.includes('gamertag')) { showToast('That gamertag is already taken.', 'error'); return; } throw error; }
+
+        // Only close modal and update localStorage after successful save
+        var profile = { displayName: displayName, gamertag: gamertag, bio: bio };
+        localStorage.setItem('mmobase-profile', JSON.stringify(profile));
+        loadProfileData();
+        closeBioModal();
+        showToast('Profile updated successfully.', 'success');
+      } catch(e) {
+        showToast('Profile saved locally. Database: ' + e.message, 'error');
+      }
+    }
+
+    function handleAvatarUpload(input) {
+      if (input.files && input.files[0]) {
+        var reader = new FileReader();
+        reader.onload = function(e) {
+          var img = document.getElementById('avatarImage');
+          img.src = e.target.result;
+          img.style.display = 'block';
+          document.getElementById('avatarPlaceholder').style.display = 'none';
+          localStorage.setItem('mmobase-avatar', e.target.result);
+          showToast('Profile picture updated.', 'success');
+        };
+        reader.readAsDataURL(input.files[0]);
+      }
+    }
+
+    function loadProfileData() {
+      var saved = JSON.parse(localStorage.getItem('mmobase-profile') || '{}');
+      var avatar = localStorage.getItem('mmobase-avatar');
+
+      if (saved.displayName) {
+        document.getElementById('profileDisplayName').textContent = saved.displayName;
+
+      }
+      if (saved.gamertag) {
+        document.getElementById('profileGamertag').textContent = '@' + saved.gamertag.replace('@', '');
+      }
+      if (saved.bio) {
+        document.getElementById('profileBio').innerHTML = saved.bio;
+      }
+      if (avatar) {
+        var img = document.getElementById('avatarImage');
+        img.src = avatar;
+        img.style.display = 'block';
+        document.getElementById('avatarPlaceholder').style.display = 'none';
+      }
+    }
+
+    // SUPABASE AUTH
+    const SUPABASE_URL = 'https://rfswlpozpwcrlnpymbsr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmc3dscG96cHdjcmxucHltYnNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1NDk3MTcsImV4cCI6MjA4NDEyNTcxN30._5pxb0WCJ0FBQ0_DA8BJjm5jCA9nxVDBn8IOGRjKnoI';
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function checkUserSession() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && session.user) {
+        updateUIForSignedInUser(session.user);
+
+        // Load profile data from Supabase profiles table
+        const { data: dbProfile } = await supabaseClient.from('profiles').select('gamertag, display_name, bio').eq('id', session.user.id).single();
+        
+        var displayName = session.user.user_metadata?.full_name || 'User';
+        var gamertag = '';
+        var bio = '';
+        
+        if (dbProfile) {
+          if (dbProfile.display_name) displayName = dbProfile.display_name;
+          if (dbProfile.gamertag) gamertag = dbProfile.gamertag;
+          if (dbProfile.bio) bio = dbProfile.bio;
+        }
+        
+        // Update localStorage to stay in sync
+        localStorage.setItem('mmobase-profile', JSON.stringify({displayName: displayName, gamertag: gamertag, bio: bio}));
+        
+        document.getElementById('profileDisplayName').textContent = displayName;
+        document.getElementById('profileGamertag').textContent = gamertag || '@0000';
+        if (bio) document.getElementById('profileBio').innerHTML = bio;
+
+        // Format join date
+        var created = new Date(session.user.created_at);
+        var months = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+        var dateStr = months[created.getMonth()] + ' ' + created.getFullYear();
+        document.getElementById('profileJoinDate').textContent = 'Member since ' + dateStr;
+        
+
+        loadProfileData();
+      } else {
+        window.location.href = '/dashboard';
+      }
+    }
+
+    function updateUIForSignedInUser(user) {
+      const a = document.getElementById('authButton');
+      a.textContent = 'Hi, ' + (user.user_metadata?.full_name || 'User').split(' ')[0];
+      a.onclick = (e) => toggleDropdown(e);
+    }
+    function toggleDropdown(e) { e.preventDefault(); e.stopPropagation(); document.getElementById('userDropdown').classList.toggle('show'); }
+    async function handleAuthClick(e) {
+      e.preventDefault();
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && session.user) { toggleDropdown(e); } else { window.location.href = '/dashboard'; }
+    }
+    async function handleSignOut(e) {
+      e.preventDefault();
+      const { error } = await supabaseClient.auth.signOut();
+      if (!error) {
+        showToast('You have been signed out successfully.', 'success');
+        setTimeout(function(){ window.location.href = '/'; }, 1500);
+      }
+    }
+    document.addEventListener('click', function(e) {
+      const ud = document.getElementById('userDropdown');
+      const um = document.querySelector('.user-menu');
+      if (ud && um && !um.contains(e.target)) ud.classList.remove('show');
+    });
+    function toggleDarkLight() {
+      var b = document.body, i = document.getElementById('modeIcon');
+      b.classList.toggle('light-mode');
+      if (b.classList.contains('light-mode')) {
+        i.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        localStorage.setItem('mmobase-theme', 'light');
+      } else {
+        i.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+        localStorage.setItem('mmobase-theme', 'dark');
+      }
+    }
+    function initTheme() {
+      var saved = localStorage.getItem('mmobase-theme');
+      if (saved === 'light') {
+        document.body.classList.add('light-mode');
+        var i = document.getElementById('modeIcon');
+        if (i) i.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      }
+    }
+    initTheme();
+    window.addEventListener('DOMContentLoaded', checkUserSession);
+  </script>
+
+  <script>
+    // v64 safe nav fix: one-shot repair only, no continuous watcher, no interval loop.
+    (function(){
+      function addTransparencyLinkOnce() {
+        var navs = document.querySelectorAll('header nav');
+        for (var i = 0; i < navs.length; i++) {
+          var nav = navs[i];
+          var links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+
+          var donations = links.find(function(a) {
+            var href = a.getAttribute('href') || '';
+            return href === 'donations' || href === '/donations' || href === 'donations.html' || href === '/donations.html';
+          });
+
+          if (!donations) continue;
+
+          var transparency = links.find(function(a) {
+            var href = a.getAttribute('href') || '';
+            return href === 'transparency' || href === '/transparency' || href === 'transparency.html' || href === '/transparency.html';
+          });
+
+          if (!transparency) {
+            transparency = document.createElement('a');
+            transparency.href = 'transparency';
+            transparency.textContent = 'Transparency';
+          } else {
+            transparency.textContent = 'Transparency';
+          }
+
+          if (transparency.nextElementSibling !== donations) {
+            nav.insertBefore(transparency, donations);
+          }
+        }
+      }
+
+      window.addTransparencyLinkOnce = addTransparencyLinkOnce;
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', addTransparencyLinkOnce);
+      } else {
+        addTransparencyLinkOnce();
+      }
+
+      window.addEventListener('load', function() {
+        addTransparencyLinkOnce();
+        setTimeout(addTransparencyLinkOnce, 300);
+        setTimeout(addTransparencyLinkOnce, 1200);
+        setTimeout(addTransparencyLinkOnce, 2500);
+      });
+    })();
+  </script>
+
+</body>
+</html>
