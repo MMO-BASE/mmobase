@@ -1038,6 +1038,8 @@
               <button class="asset-range-btn wallet-range-btn" onclick="setWalletBalanceRange(7, this)" style="background:var(--adim);color:var(--acc);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-family:var(--m);font-size:11px;cursor:pointer;">7</button>
               <button class="asset-range-btn wallet-range-btn" onclick="setWalletBalanceRange(14, this)" style="background:transparent;color:var(--t3);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-family:var(--m);font-size:11px;cursor:pointer;">14</button>
               <button class="asset-range-btn wallet-range-btn" onclick="setWalletBalanceRange(30, this)" style="background:transparent;color:var(--t3);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-family:var(--m);font-size:11px;cursor:pointer;">30</button>
+              <button class="asset-range-btn wallet-range-btn" onclick="setWalletBalanceRange(90, this)" style="background:transparent;color:var(--t3);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-family:var(--m);font-size:11px;cursor:pointer;">90</button>
+              <button class="asset-range-btn wallet-range-btn" onclick="setWalletBalanceRange(180, this)" style="background:transparent;color:var(--t3);border:1px solid var(--border);border-radius:6px;padding:4px 8px;font-family:var(--m);font-size:11px;cursor:pointer;">180</button>
             </div>
           </div>
           <div class="wealth-row">
@@ -1094,6 +1096,8 @@
               <button class="asset-range-btn active" data-days="7" onclick="setAssetValueRange(7,this)" style="padding:5px 10px;border:1px solid var(--border);background:var(--adim);color:var(--acc);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">7D</button>
               <button class="asset-range-btn" data-days="14" onclick="setAssetValueRange(14,this)" style="padding:5px 10px;border:1px solid var(--border);background:transparent;color:var(--t3);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">14D</button>
               <button class="asset-range-btn" data-days="30" onclick="setAssetValueRange(30,this)" style="padding:5px 10px;border:1px solid var(--border);background:transparent;color:var(--t3);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">30D</button>
+              <button class="asset-range-btn" data-days="90" onclick="setAssetValueRange(90,this)" style="padding:5px 10px;border:1px solid var(--border);background:transparent;color:var(--t3);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">90D</button>
+              <button class="asset-range-btn" data-days="180" onclick="setAssetValueRange(180,this)" style="padding:5px 10px;border:1px solid var(--border);background:transparent;color:var(--t3);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer;">180D</button>
             </div>
           </div>
 
@@ -2194,6 +2198,42 @@
       });
     })();
   </script>
+
+
+<script>
+  async function connectEveFromDashboard(event) {
+    if (event) event.preventDefault();
+
+    try {
+      const sessionResult = await supabaseClient.auth.getSession();
+      const session = sessionResult && sessionResult.data ? sessionResult.data.session : null;
+
+      if (!session) {
+        window.location.href = '/dashboard';
+        return;
+      }
+
+      window.location.href = '/auth/eve?token=' + encodeURIComponent(session.access_token) + '&from=dashboard';
+    } catch (error) {
+      console.error('Failed to start EVE SSO from dashboard:', error);
+      window.location.href = '/settings';
+    }
+  }
+
+  function wireDashboardEveConnectButtons() {
+    document.querySelectorAll('.char-connect-new').forEach(function(button) {
+      button.setAttribute('href', '#');
+      button.onclick = connectEveFromDashboard;
+    });
+  }
+
+  document.addEventListener('DOMContentLoaded', wireDashboardEveConnectButtons);
+  window.addEventListener('load', function() {
+    wireDashboardEveConnectButtons();
+    setTimeout(wireDashboardEveConnectButtons, 500);
+    setTimeout(wireDashboardEveConnectButtons, 1500);
+  });
+</script>
 
 </body>
 </html>

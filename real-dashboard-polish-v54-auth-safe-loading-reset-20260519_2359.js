@@ -9,12 +9,14 @@ var nameCache = {};
 
 // Format ISK values
 function formatISK(amount) {
-  if (amount === null || amount === undefined) return '0 ISK';
+  if (amount === null || amount === undefined) return '0.000 ISK';
   var n = parseFloat(amount);
-  if (n >= 1000000000) return (n / 1000000000).toFixed(1) + 'B ISK';
-  if (n >= 1000000) return (n / 1000000).toFixed(1) + 'M ISK';
-  if (n >= 1000) return (n / 1000).toFixed(1) + 'K ISK';
-  return Math.round(n).toLocaleString() + ' ISK';
+  if (!Number.isFinite(n)) return '0.000 ISK';
+  if (n >= 1000000000000) return (n / 1000000000000).toFixed(3) + 'T ISK';
+  if (n >= 1000000000) return (n / 1000000000).toFixed(3) + 'B ISK';
+  if (n >= 1000000) return (n / 1000000).toFixed(3) + 'M ISK';
+  if (n >= 1000) return (n / 1000).toFixed(3) + 'K ISK';
+  return n.toFixed(3) + ' ISK';
 }
 
 
@@ -503,28 +505,43 @@ function renderAssetValueChart(days) {
   today.setHours(0, 0, 0, 0);
 
   var dailyRows = [];
+  var firstKnown = history.length ? history[0] : null;
+  var lastKnown = null;
+  var realDayCount = 0;
+
   for (var i = days - 1; i >= 0; i--) {
     var d = new Date(today.getTime() - i * 86400000);
     var key = dateKey(d);
-    if (byDay[key]) {
+    var source = byDay[key];
+
+    if (source) {
+      realDayCount += 1;
+      lastKnown = source;
+    } else if (!lastKnown) {
+      for (var h = history.length - 1; h >= 0; h--) {
+        if (dateKey(new Date(history[h].created_at)) <= key) {
+          lastKnown = history[h];
+          break;
+        }
+      }
+      source = lastKnown || firstKnown;
+    } else {
+      source = lastKnown;
+    }
+
+    if (!source && firstKnown) source = firstKnown;
+
+    if (source) {
       dailyRows.push({
-        created_at: byDay[key].created_at,
+        created_at: d.toISOString(),
         day_key: key,
-        total_value: Number(byDay[key].total_value || 0)
+        total_value: Number(source.total_value || 0),
+        carried_forward: !byDay[key]
       });
     }
   }
 
-  if (dailyRows.length < 1 && history.length > 0) {
-    var latest = history[history.length - 1];
-    dailyRows = [{
-      created_at: latest.created_at,
-      day_key: dateKey(new Date(latest.created_at)),
-      total_value: Number(latest.total_value || 0)
-    }];
-  }
-
-  var hasFullHistory = dailyRows.length >= days;
+  var hasFullHistory = realDayCount >= days;
 
   if (!hasFullHistory) {
     if (changeLabel) changeLabel.textContent = "Status";
@@ -1323,28 +1340,43 @@ function renderWalletBalanceChart(currentWallet, summary, days) {
   today.setHours(0, 0, 0, 0);
 
   var dailyRows = [];
+  var firstKnown = history.length ? history[0] : null;
+  var lastKnown = null;
+  var realDayCount = 0;
+
   for (var i = days - 1; i >= 0; i--) {
     var d = new Date(today.getTime() - i * 86400000);
     var key = dateKey(d);
-    if (byDay[key]) {
+    var source = byDay[key];
+
+    if (source) {
+      realDayCount += 1;
+      lastKnown = source;
+    } else if (!lastKnown) {
+      for (var h = history.length - 1; h >= 0; h--) {
+        if (dateKey(new Date(history[h].created_at)) <= key) {
+          lastKnown = history[h];
+          break;
+        }
+      }
+      source = lastKnown || firstKnown;
+    } else {
+      source = lastKnown;
+    }
+
+    if (!source && firstKnown) source = firstKnown;
+
+    if (source) {
       dailyRows.push({
-        created_at: byDay[key].created_at,
+        created_at: d.toISOString(),
         day_key: key,
-        balance: Number(byDay[key].balance || 0)
+        balance: Number(source.balance || 0),
+        carried_forward: !byDay[key]
       });
     }
   }
 
-  if (dailyRows.length < 1 && history.length > 0) {
-    var latest = history[history.length - 1];
-    dailyRows = [{
-      created_at: latest.created_at,
-      day_key: dateKey(new Date(latest.created_at)),
-      balance: Number(latest.balance || 0)
-    }];
-  }
-
-  var hasFullHistory = dailyRows.length >= days;
+  var hasFullHistory = realDayCount >= days;
 
   if (!hasFullHistory) {
     if (changeLabel) changeLabel.textContent = "Status";
