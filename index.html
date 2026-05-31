@@ -1,0 +1,919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MMOBASE</title>
+<meta property="og:title" content="MMOBASE — The Ultimate EVE Online Dashboard"><meta property="og:description" content="Track assets, skills, wallet, market orders, and net worth across all your characters."><meta property="og:image" content="https://mmobase.co.uk/mmobase-logo.png"><meta property="og:url" content="https://mmobase.co.uk"><meta property="og:type" content="website">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- Google Font -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <!-- Supabase -->
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    body {
+      background: #0a0e17;
+
+    overflow-x: hidden;
+      color: #ffffff;
+    }
+    /* NAVBAR */
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 20px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 10;
+    }
+    .logo {
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 0.5px;
+    }
+    nav a {
+      color: #cccccc;
+      text-decoration: none;
+      margin-left: 28px;
+      font-size: 15px;
+      transition: color 0.2s ease;
+    }
+    nav a:hover {
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+      color: white;
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    }
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    .nav-cta {
+      padding: 10px 18px;
+      background: white;
+      color: black;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    
+    .mode-toggle {
+      background: transparent;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      margin-left: 14px;
+      transition: color 0.2s ease;
+      vertical-align: middle;
+      line-height: 1;
+      color: #cccccc;
+      font-size: 15px;
+    }
+    
+    .mode-toggle:hover {
+      color: white;
+    }
+    
+    .mode-toggle svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      vertical-align: middle;
+    }
+    
+    /* USER DROPDOWN */
+    .user-menu {
+      position: relative;
+      display: inline-block;
+    }
+    
+    /* GAMES DROPDOWN */
+    .games-menu {
+      position: relative;
+      display: inline-block;
+    }
+    
+    .games-toggle {
+      color: #cccccc;
+      text-decoration: none;
+      margin-left: 28px;
+      font-size: 15px;
+      transition: color 0.2s ease;
+      cursor: pointer;
+    }
+    
+    .games-toggle:hover {
+      color: white;
+    }
+    
+    .games-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      min-width: 160px;
+      animation: dropdownSlide 0.2s ease;
+      z-index: 1000;
+    }
+    
+    .games-dropdown.show {
+      display: block;
+    }
+    
+    .games-dropdown a {
+      display: block;
+      padding: 8px 30px;
+      color: #cccccc;
+      text-decoration: none;
+      font-size: 14px;
+      transition: color 0.2s ease;
+      margin: 0;
+    }
+    
+    .games-dropdown a:hover {
+      color: white;
+    }
+    
+    .user-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      min-width: 180px;
+      animation: dropdownSlide 0.2s ease;
+      z-index: 1000;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+    }
+    
+    .user-dropdown.show {
+      display: block;
+    }
+    
+    .user-dropdown a {
+      display: block;
+      padding: 12px 20px;
+      color: #1a1a1a;
+      text-decoration: none;
+      font-size: 14px;
+      transition: background 0.2s ease;
+      margin: 0;
+    }
+    
+    .user-dropdown a:hover {
+      background: rgba(107, 138, 255, 0.08);
+      color: #1a1a1a;
+    }
+    
+    .user-dropdown hr {
+      margin: 4px 0;
+      border: none;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+    
+    @keyframes dropdownSlide {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+    
+    /* HERO SECTION - IMPROVED IMAGE QUALITY */
+    .hero {
+      position: relative;
+      min-height: 100vh;
+      min-height: 100lvh;
+      display: flex;
+      align-items: center;
+      padding: 0 64px;
+    }
+    
+    /* Background image layer with improved rendering */
+    .hero::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: url("homepage-background.jpg");
+      background-position: center;
+      background-size: cover;
+      background-repeat: no-repeat;
+      image-rendering: -webkit-optimize-contrast;
+      image-rendering: crisp-edges;
+      -webkit-backface-visibility: hidden;
+      backface-visibility: hidden;
+      transform: translateZ(0);
+      -webkit-transform: translateZ(0);
+      filter: contrast(1.06) brightness(1.15) saturate(1.1);
+      z-index: 1;
+    }
+    
+    /* Gradient overlay with subtle blue tint over Earth */
+    .hero::after {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(
+        120deg,
+        rgba(80, 100, 220, 0.15) 0%,
+        rgba(40, 60, 150, 0.1) 40%,
+        rgba(0, 0, 0, 0.35) 70%,
+        rgba(0, 0, 0, 0.5) 100%
+      );
+      z-index: 2;
+    }
+    
+    .hero-content {
+      position: relative;
+      z-index: 3;
+      max-width: 720px;
+      margin-left: -24px;
+      margin-top: -50px;
+      animation: fadeUp 1.2s ease forwards;
+    }
+    .hero h1 {
+      font-size: 64px;
+      font-weight: 700;
+      line-height: 1.1;
+      margin-bottom: 24px;
+      text-shadow: 0 2px 20px rgba(0, 0, 0, 0.5);
+      white-space: nowrap;
+      
+    }
+    .hero p {
+      font-size: 20px;
+      color: #dddddd;
+      margin-bottom: 36px;
+      max-width: 600px;
+      text-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+    }
+    .hero-buttons a {
+      display: inline-block;
+      padding: 16px 28px;
+      border-radius: 14px;
+      font-size: 16px;
+      font-weight: 600;
+      text-decoration: none;
+      margin-right: 16px;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .btn-primary {
+      background: white;
+      color: black;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .btn-secondary {
+      border: 1px solid rgba(255,255,255,0.6);
+      color: white;
+    }
+    .hero-buttons a:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 40px rgba(0,0,0,0.5);
+    }
+    
+    /* MODAL OVERLAY */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.7);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+      animation: fadeIn 0.3s ease;
+    }
+    
+    .modal-overlay.active {
+      display: flex;
+    }
+    
+    /* AUTH MODAL */
+    .auth-modal {
+      background: #ffffff;
+      border-radius: 24px;
+      width: 100%;
+      max-width: 440px;
+      
+      
+      padding: 48px;
+      position: relative;
+      animation: slideUp 0.3s ease;
+      box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+    }
+    
+    .close-modal {
+      position: absolute;
+      top: 20px;
+      right: 20px;
+      background: transparent;
+      border: none;
+      font-size: 28px;
+      color: #666666;
+      cursor: pointer;
+      width: 32px;
+      height: 32px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 50%;
+      transition: all 0.2s ease;
+    }
+    
+    .close-modal:hover {
+      background: rgba(0, 0, 0, 0.05);
+      color: #1a1a1a;
+    }
+    
+    .auth-header {
+      text-align: center;
+      margin-bottom: 40px;
+    }
+    
+    .auth-header h1 {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      color: #1a1a1a;
+    }
+    
+    .auth-header p {
+      font-size: 16px;
+      color: #666666;
+    }
+    
+    .auth-toggle {
+      display: flex;
+      gap: 8px;
+      background: rgba(107, 138, 255, 0.08);
+      border-radius: 12px;
+      padding: 6px;
+      margin-bottom: 32px;
+    }
+    
+    .toggle-btn {
+      flex: 1;
+      padding: 12px;
+      border: none;
+      background: transparent;
+      border-radius: 8px;
+      font-size: 15px;
+      font-weight: 600;
+      color: #666666;
+      cursor: pointer;
+      transition: all 0.2s ease;
+    }
+    
+    .toggle-btn.active {
+      background: white;
+      color: #1a1a1a;
+      box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    }
+    
+    .auth-form {
+      display: none;
+    }
+    
+    .auth-form.active {
+      display: block;
+    }
+    
+    .form-group {
+      margin-bottom: 20px;
+    }
+    
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #1a1a1a;
+      margin-bottom: 8px;
+    }
+    
+    .form-group input {
+      width: 100%;
+      padding: 14px 16px;
+      border: 1px solid rgba(0, 0, 0, 0.15);
+      border-radius: 10px;
+      font-size: 15px;
+      background: white;
+      transition: all 0.2s ease;
+      color: #1a1a1a;
+    }
+    
+    .form-group input:focus {
+      outline: none;
+      border-color: rgba(107, 138, 255, 0.5);
+      box-shadow: 0 0 0 3px rgba(107, 138, 255, 0.08);
+    }
+    
+    .form-group input::placeholder {
+      color: #999999;
+    }
+    
+    .submit-btn {
+      width: 100%;
+      padding: 16px;
+      background: #1a1a1a;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      margin-top: 8px;
+    }
+    
+    .submit-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
+    }
+    
+    .submit-btn:active {
+      transform: translateY(0);
+    }
+    
+    .auth-footer {
+      text-align: center;
+      margin-top: 24px;
+      font-size: 14px;
+      color: #666666;
+    }
+    
+    .auth-footer a {
+      color: #6b8aff;
+      text-decoration: none;
+      font-weight: 600;
+    }
+    
+    .auth-footer a:hover {
+      text-decoration: underline;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    
+    @keyframes slideUp {
+      from { opacity: 0; transform: translateY(40px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* AUTO ZOOM FOR SMALLER SCREENS */
+    /* RESPONSIVE - LAPTOPS */
+    @media (max-height: 800px) {
+      body { zoom: 0.84; }
+      .hero { min-height: calc(100vh / 0.84); }
+    }
+    @media (max-height: 700px) {
+      body { zoom: 0.78; }
+      .hero { min-height: calc(100vh / 0.78); }
+    }
+    @media (max-height: 800px) {
+    }
+      .hero p { max-width: 500px; }
+    }
+    /* RESPONSIVE */
+    @media (max-width: 768px) {
+      header {
+        padding: 20px 32px;
+      }
+      .hero {
+        padding: 0 32px;
+      }
+      .hero h1 {
+        font-size: 44px;
+      }
+      .hero p {
+        font-size: 18px;
+      }
+      .auth-modal {
+        padding: 32px 24px;
+      }
+      .auth-header h1 {
+        font-size: 28px;
+      }
+    }
+  </style>
+  <link rel="icon" type="image/png" href="/favicon.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V431CY30BX"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-V431CY30BX");</script>
+</head>
+<body>
+<!-- MMOBASE BUILD transparency-v67-dropdown-html-route-fix-20260520_0232 -->
+<header>
+    <div class="logo">MMOBASE</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="https://v2.mmobase.co.uk/transparency">Transparency</a>
+      <a href="https://v2.mmobase.co.uk/donations">Donations</a>
+      <div class="user-menu">
+        <a href="#" class="nav-cta" id="authButton" onclick="handleAuthClick(event)">Get Started</a>
+        <div class="user-dropdown" id="userDropdown">
+          <a href="/profile">Profile</a>
+          <a href="/settings">Settings</a>
+          <hr>
+          <a href="#" onclick="handleSignOut(event)">Sign Out</a>
+        </div>
+      </div>
+      <button class="mode-toggle" id="modeToggle" onclick="toggleDarkLight()" title="Toggle light/dark mode"><svg id="modeIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+    </nav>
+  </header>
+  <section class="hero">
+    <div class="hero-content">
+      <h1>The Ultimate EVE Online Dashboard</h1>
+      <p>
+        Track assets, industry projects, and net worth across all characters.
+      </p>
+      <div class="hero-buttons">
+        <a href="/demo" class="btn-primary">View Dashboard Demo</a>
+        <a href="/learn-more" class="btn-secondary">Learn More</a>
+      </div>
+    </div>
+  </section>
+
+  <!-- AUTH MODAL -->
+  <div id="authModal" class="modal-overlay" onclick="closeModalOnOverlay(event)">
+    <div class="auth-modal">
+      <button class="close-modal" onclick="closeModal()">&times;</button>
+      
+      <div class="auth-header">
+        <h1>Welcome to MMOBASE</h1>
+        <p>Track your empire across the stars</p>
+      </div>
+
+      <div class="auth-toggle">
+        <button class="toggle-btn active" onclick="showSignUp()">Sign Up</button>
+        <button class="toggle-btn" onclick="showSignIn()">Sign In</button>
+      </div>
+
+      <form id="signUpForm" class="auth-form active">
+        <div class="form-group">
+          <label for="signup-name">Display Name</label>
+          <input type="text" id="signup-name" placeholder="Enter a display name" required>
+        </div>
+        <div class="form-group">
+          <label for="signup-email">Email</label>
+          <input type="email" id="signup-email" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+          <label for="signup-password">Password</label>
+          <input type="password" id="signup-password" placeholder="Create a password" required>
+        </div>
+        <button type="submit" class="submit-btn">Create Account</button>
+      </form>
+
+      <form id="signInForm" class="auth-form">
+        <div class="form-group">
+          <label for="signin-email">Email</label>
+          <input type="email" id="signin-email" placeholder="Enter your email" required>
+        </div>
+        <div class="form-group">
+          <label for="signin-password">Password</label>
+          <input type="password" id="signin-password" placeholder="Enter your password" required>
+        </div>
+        <div class="auth-footer" style="text-align: right; margin-top: -8px; margin-bottom: 16px;">
+          <a href="#" onclick="handleForgotPassword(event)">Forgot password?</a>
+        </div>
+        <button type="submit" class="submit-btn">Sign In</button>
+      </form>
+
+      <div class="auth-footer">
+        By continuing, you agree to our <a href="/terms-of-service">Terms</a> and <a href="/privacy-policy">Privacy Policy</a>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    const SUPABASE_URL = 'https://rfswlpozpwcrlnpymbsr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmc3dscG96cHdjcmxucHltYnNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1NDk3MTcsImV4cCI6MjA4NDEyNTcxN30._5pxb0WCJ0FBQ0_DA8BJjm5jCA9nxVDBn8IOGRjKnoI';
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function checkUserSession() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && session.user) {
+        updateUIForSignedInUser(session.user);
+      }
+    }
+
+    function updateUIForSignedInUser(user) {
+      const authButton = document.getElementById('authButton');
+      const fullName = user.user_metadata?.full_name || 'User';
+      const firstName = fullName.split(' ')[0];
+      authButton.textContent = `Hi, ${firstName}`;
+      authButton.onclick = (e) => toggleDropdown(e);
+    }
+
+    // Toggle Games dropdown
+    function toggleGamesDropdown(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const dropdown = document.getElementById('gamesDropdown');
+      dropdown.classList.toggle('show');
+    }
+
+    // Close Games dropdown when clicking outside
+    document.addEventListener('click', function(event) {
+      const gamesDropdown = document.getElementById('gamesDropdown');
+      const gamesMenu = document.querySelector('.games-menu');
+      if (gamesDropdown && gamesMenu && !gamesMenu.contains(event.target)) {
+        gamesDropdown.classList.remove('show');
+      }
+    });
+
+    function toggleDropdown(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      const dropdown = document.getElementById('userDropdown');
+      dropdown.classList.toggle('show');
+    }
+
+    async function handleAuthClick(event) {
+      event.preventDefault();
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && session.user) {
+        toggleDropdown(event);
+      } else {
+        openModal();
+      }
+    }
+
+    async function handleSignOut(event) {
+      event.preventDefault();
+      const { error } = await supabaseClient.auth.signOut();
+      if (!error) {
+        const authButton = document.getElementById('authButton');
+        authButton.textContent = 'Get Started';
+        authButton.onclick = (e) => handleAuthClick(e);
+        const dropdown = document.getElementById('userDropdown');
+        dropdown.classList.remove('show');
+        showToast('You have been signed out successfully.', 'success');
+      }
+    }
+
+    document.addEventListener('click', function(event) {
+      const dropdown = document.getElementById('userDropdown');
+      const userMenu = document.querySelector('.user-menu');
+      if (dropdown && userMenu && !userMenu.contains(event.target)) {
+        dropdown.classList.remove('show');
+      }
+    });
+
+    function openModal() {
+      document.getElementById('authModal').classList.add('active');
+      document.body.style.overflow = 'hidden';
+    }
+
+    function closeModal() {
+      document.getElementById('authModal').classList.remove('active');
+      document.body.style.overflow = 'auto';
+    }
+
+    function closeModalOnOverlay(event) {
+      if (event.target === document.getElementById('authModal')) {
+        closeModal();
+      }
+    }
+
+    function showSignUp() {
+      document.getElementById('signUpForm').classList.add('active');
+      document.getElementById('signInForm').classList.remove('active');
+      document.querySelectorAll('.toggle-btn')[0].classList.add('active');
+      document.querySelectorAll('.toggle-btn')[1].classList.remove('active');
+    }
+
+    function showSignIn() {
+      document.getElementById('signInForm').classList.add('active');
+      document.getElementById('signUpForm').classList.remove('active');
+      document.querySelectorAll('.toggle-btn')[1].classList.add('active');
+      document.querySelectorAll('.toggle-btn')[0].classList.remove('active');
+    }
+
+    document.getElementById('signUpForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const name = document.getElementById('signup-name').value;
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      try {
+        const { data, error } = await supabaseClient.auth.signUp({
+          email: email,
+          password: password,
+          options: { data: { full_name: name } }
+        });
+        if (error) throw error;
+        if(data.session) { showToast('Account created! Welcome to MMOBASE.', 'success'); setTimeout(function(){ location.reload(); }, 1500); } else { showToast('Account created! Check your email to confirm.', 'success'); }
+        closeModal();
+        document.getElementById('signUpForm').reset();
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    });
+
+    document.getElementById('signInForm').addEventListener('submit', async function(e) {
+      e.preventDefault();
+      const email = document.getElementById('signin-email').value;
+      const password = document.getElementById('signin-password').value;
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({
+          email: email,
+          password: password
+        });
+        if (error) throw error;
+        showToast('Welcome back! You are now signed in.', 'success');
+        closeModal();
+        document.getElementById('signInForm').reset();
+        updateUIForSignedInUser(data.user);
+      } catch (error) {
+        showToast(error.message, 'error');
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') { closeModal(); }
+    });
+
+    window.addEventListener('DOMContentLoaded', checkUserSession);
+
+    // Dark/Light mode toggle
+    function toggleDarkLight() {
+      const body = document.body;
+      const icon = document.getElementById('modeIcon');
+      body.classList.toggle('light-mode');
+      if (body.classList.contains('light-mode')) {
+        icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        localStorage.setItem('mmobase-theme', 'light');
+      } else {
+        icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+        localStorage.setItem('mmobase-theme', 'dark');
+      }
+    }
+    function initTheme() {
+      var saved = localStorage.getItem('mmobase-theme');
+      if (saved === 'light') {
+        document.body.classList.add('light-mode');
+        var i = document.getElementById('modeIcon');
+        if (i) i.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      }
+    }
+
+    async function handleForgotPassword(e) {
+      e.preventDefault();
+      var email = document.getElementById('signin-email');
+      if (!email || !email.value) {
+        showToast('Please enter your email address first.', 'error');
+        return;
+      }
+      try {
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email.value, {
+          redirectTo: 'https://v2.mmobase.co.uk'
+        });
+        if (error) throw error;
+        showToast('Password reset email sent. Check your inbox.', 'success');
+      } catch(err) {
+        showToast(err.message, 'error');
+      }
+    }
+    initTheme();
+  </script>
+
+  <!-- COOKIE CONSENT BANNER -->
+  <div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;width:100%;background:rgba(10,14,23,0.98);border-top:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(12px);padding:18px 48px;z-index:99999;font-family:Inter,sans-serif;">
+    <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;">
+      <p style="font-size:13px;color:#8892a6;margin:0;flex:1;line-height:1.6;min-width:280px;">We use cookies to keep you signed in and remember your preferences. No tracking, no ads. See our <a href="/privacy-policy" style="color:#00b4d8;text-decoration:none;">Privacy Policy</a> for details.</p>
+      <div style="display:flex;gap:10px;flex-shrink:0;">
+        <button onclick="acceptCookies()" style="padding:8px 22px;background:#00b4d8;color:#000;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;">Accept</button>
+        <button onclick="declineCookies()" style="padding:8px 22px;background:transparent;color:#8892a6;border:1px solid rgba(255,255,255,0.15);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;">Decline</button>
+      </div>
+    </div>
+  </div>
+  <style>
+    #cookieBanner.show{display:block !important;animation:slideUpCookie 0.4s ease}
+    @keyframes slideUpCookie{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    @keyframes slideDownCookie{from{transform:translateY(0);opacity:1}to{transform:translateY(100%);opacity:0}}
+    body.light-mode #cookieBanner{background:rgba(240,242,245,0.98);border-top-color:rgba(0,0,0,0.08)}
+    body.light-mode #cookieBanner p{color:#555}
+    body.light-mode #cookieBanner button:last-child{color:#666;border-color:rgba(0,0,0,0.15)}
+    @media(max-width:700px){#cookieBanner>div{flex-direction:column;gap:12px}#cookieBanner{padding:16px 20px}}
+  </style>
+  <script>
+    function acceptCookies(){localStorage.setItem('mmobase-cookies','accepted');closeCookieBanner()}
+    function declineCookies(){localStorage.setItem('mmobase-cookies','declined');closeCookieBanner()}
+    function closeCookieBanner(){var b=document.getElementById('cookieBanner');b.style.animation='slideDownCookie 0.3s ease forwards';setTimeout(function(){b.remove()},300)}
+    (function(){if(!localStorage.getItem('mmobase-cookies')){setTimeout(function(){document.getElementById('cookieBanner').classList.add('show')},1000)}})();
+  </script>
+
+
+  <!-- TOAST NOTIFICATION SYSTEM -->
+  <style>
+    .mmobase-toast{position:fixed;left:24px;bottom:12px;padding:14px 22px;border-radius:10px;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;z-index:100000;display:flex;align-items:center;gap:10px;max-width:380px;line-height:1.5;animation:toastSlideIn 0.4s ease;box-shadow:0 8px 32px rgba(0,0,0,0.25)}
+    .mmobase-toast.success{background:#0d2818;border:1px solid rgba(34,197,94,0.2);color:#4ade80}
+    .mmobase-toast.error{background:#2a0a0a;border:1px solid rgba(239,68,68,0.2);color:#f87171}
+    .mmobase-toast.info{background:#0a1628;border:1px solid rgba(0,180,216,0.2);color:#67d4e8}
+    .mmobase-toast.hiding{animation:toastSlideOut 0.3s ease forwards}
+    body.light-mode .mmobase-toast.success{background:#f0fdf4;border-color:rgba(34,197,94,0.3);color:#15803d}
+    body.light-mode .mmobase-toast.error{background:#fef2f2;border-color:rgba(239,68,68,0.3);color:#b91c1c}
+    body.light-mode .mmobase-toast.info{background:#f0f9ff;border-color:rgba(0,180,216,0.3);color:#0369a1}
+    @keyframes toastSlideIn{from{transform:translateX(-120%);opacity:0}to{transform:translateX(0);opacity:1}}
+    @keyframes toastSlideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(-120%);opacity:0}}
+    @media(max-width:700px){.mmobase-toast{left:12px;right:12px;max-width:none;bottom:80px}}
+  </style>
+  <script>
+    function showToast(message, type) {
+      type = type || 'info';
+      var existing = document.querySelectorAll('.mmobase-toast');
+      existing.forEach(function(t){t.remove()});
+      var icons = {success:'✓',error:'✕',info:'ℹ'};
+      var toast = document.createElement('div');
+      toast.className = 'mmobase-toast ' + type;
+      toast.innerHTML = '<span style="font-size:16px;font-weight:700;">' + icons[type] + '</span><span>' + message + '</span>';
+      document.body.appendChild(toast);
+      setTimeout(function(){toast.classList.add('hiding');setTimeout(function(){toast.remove()},300)},4000);
+    }
+  </script>
+
+
+  <script>
+    // v64 safe nav fix: one-shot repair only, no continuous watcher, no interval loop.
+    (function(){
+      function addTransparencyLinkOnce() {
+        var navs = document.querySelectorAll('header nav');
+        for (var i = 0; i < navs.length; i++) {
+          var nav = navs[i];
+          var links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+
+          var donations = links.find(function(a) {
+            var href = a.getAttribute('href') || '';
+            return href === 'donations' || href === '/donations' || href === 'donations.html' || href === '/donations.html';
+          });
+
+          if (!donations) continue;
+
+          var transparency = links.find(function(a) {
+            var href = a.getAttribute('href') || '';
+            return href === 'transparency' || href === '/transparency' || href === 'transparency.html' || href === '/transparency.html';
+          });
+
+          if (!transparency) {
+            transparency = document.createElement('a');
+            transparency.href = 'transparency';
+            transparency.textContent = 'Transparency';
+          } else {
+            transparency.textContent = 'Transparency';
+          }
+
+          if (transparency.nextElementSibling !== donations) {
+            nav.insertBefore(transparency, donations);
+          }
+        }
+      }
+
+      window.addTransparencyLinkOnce = addTransparencyLinkOnce;
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', addTransparencyLinkOnce);
+      } else {
+        addTransparencyLinkOnce();
+      }
+
+      window.addEventListener('load', function() {
+        addTransparencyLinkOnce();
+        setTimeout(addTransparencyLinkOnce, 300);
+        setTimeout(addTransparencyLinkOnce, 1200);
+        setTimeout(addTransparencyLinkOnce, 2500);
+      });
+    })();
+  </script>
+
+</body>
+</html>

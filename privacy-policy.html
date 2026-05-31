@@ -1,0 +1,378 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Privacy Policy - MMOBASE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Inter', sans-serif; }
+    body { background: #0a0e17; color: #ffffff; overflow-x: hidden; min-height: 100vh; }
+    header {
+      position: fixed; top: 0; width: 100%; padding: 20px 48px;
+      display: flex; justify-content: space-between; align-items: center;
+      z-index: 9999; background: rgba(10, 14, 23, 0.98);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .logo { font-weight: 700; font-size: 20px; letter-spacing: 0.5px; }
+    nav { display: flex; align-items: center; }
+    nav a { color: #cccccc; text-decoration: none; margin-left: 28px; font-size: 15px; transition: color 0.2s ease; }
+    nav a:hover { color: white; }
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    .nav-cta { padding: 10px 18px; background: white; color: black; border-radius: 10px; font-weight: 600; cursor: pointer; text-decoration: none; display: inline-block; }
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    .mode-toggle { background: transparent; border: none; padding: 0; cursor: pointer; margin-left: 14px; transition: color 0.2s ease; color: #cccccc; }
+    .mode-toggle:hover { color: white; }
+    .mode-toggle svg { width: 18px; height: 18px; stroke: currentColor; fill: none; stroke-width: 2; vertical-align: middle; }
+    .user-menu { position: relative; display: inline-block; }
+    .user-dropdown { display: none; position: absolute; top: calc(100% + 8px); left: 0; background: white; border-radius: 10px; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2); min-width: 160px; overflow: hidden; z-index: 1000; }
+    .user-dropdown.show { display: block; }
+    .user-dropdown a { display: block; padding: 10px 16px; color: #1a1a1a; text-decoration: none; font-size: 13px; margin: 0; }
+    .user-dropdown a:hover { background: rgba(0, 180, 216, 0.08); }
+    .user-dropdown hr { margin: 4px 0; border: none; border-top: 1px solid rgba(0, 0, 0, 0.06); }
+
+    main {
+      max-width: 820px; margin: 0 auto;
+      padding: 140px 48px 80px;
+    }
+    .legal-header { margin-bottom: 48px; }
+    .legal-header h1 {
+      font-size: 40px; font-weight: 700; margin-bottom: 12px;
+    }
+    .legal-header .updated {
+      font-size: 14px; color: #8892a6;
+    }
+    .legal-content h2 {
+      font-size: 22px; font-weight: 700;
+      margin-top: 40px; margin-bottom: 14px;
+      color: #ffffff;
+    }
+    .legal-content p {
+      font-size: 15px; line-height: 1.7;
+      color: #cccccc; margin-bottom: 14px;
+    }
+    .legal-content ul {
+      margin: 12px 0 18px 22px;
+    }
+    .legal-content ul li {
+      font-size: 15px; line-height: 1.7;
+      color: #cccccc; margin-bottom: 8px;
+    }
+    .legal-content a {
+      color: #00b4d8; text-decoration: none;
+    }
+    .legal-content a:hover {
+      text-decoration: underline;
+    }
+
+    footer {
+      padding: 30px 48px; border-top: 1px solid rgba(255,255,255,0.05);
+      text-align: center; color: #666;
+      font-size: 13px;
+    }
+    footer a { color: #6b8aff; text-decoration: none; margin: 0 6px; }
+    footer a:hover { text-decoration: underline; }
+
+    body.light-mode { background: #f0f2f5; color: #1a1a1a; }
+    body.light-mode header { background: rgba(240, 242, 245, 0.98); border-bottom-color: rgba(0,0,0,0.08); }
+    body.light-mode nav a { color: #666; }
+    body.light-mode nav a:hover { color: #1a1a1a; }
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    body.light-mode .logo { color: #1a1a1a; }
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    body.light-mode .nav-cta { background: #1a1a1a; color: white; }
+    body.light-mode .mode-toggle { color: #666; }
+    body.light-mode .mode-toggle:hover { color: #1a1a1a; }
+    body.light-mode .legal-header h1 { color: #1a1a1a; }
+    body.light-mode .legal-header .updated { color: #666; }
+    body.light-mode .legal-content h2 { color: #1a1a1a; }
+    body.light-mode .legal-content p, body.light-mode .legal-content ul li { color: #333; }
+    body.light-mode footer { border-top-color: rgba(0,0,0,0.08); color: #888; }
+
+    @media (max-width: 700px) {
+      header { padding: 16px 24px; }
+      main { padding: 120px 24px 48px; }
+      .legal-header h1 { font-size: 30px; }
+    }
+      @media (max-height: 800px) { body { zoom: 0.84; } }
+    @media (max-height: 700px) { body { zoom: 0.78; } }
+    </style>
+  <link rel="icon" type="image/png" href="/favicon.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V431CY30BX"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-V431CY30BX");</script>
+</head>
+<body>
+<!-- MMOBASE BUILD transparency-v67-dropdown-html-route-fix-20260520_0232 -->
+<header>
+    <div class="logo">MMOBASE</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="https://v2.mmobase.co.uk/transparency">Transparency</a>
+      <a href="https://v2.mmobase.co.uk/donations">Donations</a>
+      <div class="user-menu">
+        <a href="#" class="nav-cta" id="authButton" onclick="handleAuthClick(event)">Get Started</a>
+        <div class="user-dropdown" id="userDropdown">
+          <a href="/profile">Profile</a>
+          <a href="/settings">Settings</a>
+          <hr>
+          <a href="#" onclick="handleSignOut(event)">Sign Out</a>
+        </div>
+      </div>
+      <button class="mode-toggle" id="modeToggle" onclick="toggleDarkLight()" title="Toggle light/dark mode"><svg id="modeIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="legal-header">
+      <h1>Privacy Policy</h1>
+      <p class="updated">Last updated: 14 April 2026</p>
+    </div>
+
+    <div class="legal-content">
+      <p>Your privacy matters. This Privacy Policy explains what data MMOBASE collects, how we use it, and your rights regarding that data. By using mmobase.co.uk, you agree to the terms of this policy.</p>
+
+      <h2>1. What We Collect</h2>
+      <p>We collect the following data when you use MMOBASE:</p>
+      <ul>
+        <li><strong>Account data:</strong> Your email address, full name, and an encrypted password when you sign up for MMOBASE</li>
+        <li><strong>EVE Online data:</strong> When you link your EVE character, we access data from CCP's ESI API using the scopes you authorise — this can include character stats, skills, wallet, assets, ship info, market orders, and related information</li>
+        <li><strong>Technical data:</strong> Basic usage information like browser type and IP address, stored temporarily in server logs</li>
+        <li><strong>Preferences:</strong> Light/dark mode choice stored in your browser via localStorage</li>
+      </ul>
+
+      <h2>2. How We Use Your Data</h2>
+      <p>We use your data to:</p>
+      <ul>
+        <li>Display your EVE character information on your personal dashboard</li>
+        <li>Let you log in to MMOBASE</li>
+        <li>Improve the site and fix bugs</li>
+        <li>Communicate with you about your account or important updates (if you've consented)</li>
+        <li>Detect and prevent abuse of the service</li>
+      </ul>
+      <p>We will never sell your data, share it with advertisers, or use it for anything beyond providing the MMOBASE service.</p>
+
+      <h2>3. Where Your Data Is Stored</h2>
+      <p>Your account data is stored on <a href="https://supabase.com" target="_blank">Supabase</a>, a third-party backend service provider. Supabase is GDPR-compliant and stores data securely with encryption. You can read <a href="https://supabase.com/privacy" target="_blank">Supabase's privacy policy here</a>.</p>
+      <p>EVE Online character data is accessed live from CCP's ESI API when you view your dashboard and is not permanently stored on our servers. We may store historical snapshots of public character data (like wallet balance or asset value over time) to enable features like wealth tracking — this data is tied to your account and deleted if you delete your account.</p>
+
+      <h2>4. Third Parties</h2>
+      <p>MMOBASE integrates with the following third parties:</p>
+      <ul>
+        <li><strong>CCP Games (EVE Online ESI API):</strong> When you link your EVE character, you authorise CCP to share your in-game data with MMOBASE. You can revoke this at any time from <a href="https://community.eveonline.com/support/third-party-applications/" target="_blank">CCP's third-party applications page</a></li>
+        <li><strong>Supabase:</strong> Our backend and authentication provider, where your MMOBASE account data is stored</li>
+        <li><strong>Discord:</strong> We link to our Discord community but Discord is a separate service with its own privacy policy</li>
+      </ul>
+
+      <h2>5. Cookies and Local Storage</h2>
+      <p>MMOBASE uses browser localStorage to remember your light/dark mode preference and to keep you signed in to your account. We do not use third-party tracking cookies, analytics cookies, or advertising cookies.</p>
+
+      <h2>6. Your Rights (UK/GDPR)</h2>
+      <p>If you're based in the UK or EU, you have the following rights under GDPR:</p>
+      <ul>
+        <li><strong>Access:</strong> Request a copy of the data we hold about you</li>
+        <li><strong>Correction:</strong> Ask us to correct any inaccurate data</li>
+        <li><strong>Deletion:</strong> Request that we delete your account and associated data ("right to be forgotten")</li>
+        <li><strong>Portability:</strong> Request your data in a portable format</li>
+        <li><strong>Objection:</strong> Object to certain uses of your data</li>
+      </ul>
+      <p>To exercise any of these rights, contact us via <a href="https://discord.gg/CDnkc7GkgG" target="_blank">Discord</a>.</p>
+
+      <h2>7. Data Retention</h2>
+      <p>We keep your account data for as long as your account is active. If you delete your account, your data will be removed from our servers within 30 days. Server logs may be retained for up to 90 days for security purposes.</p>
+
+      <h2>8. Children's Privacy</h2>
+      <p>MMOBASE is not intended for users under the age of 13. If we learn that we've collected data from a child under 13, we will delete it immediately.</p>
+
+      <h2>9. Security</h2>
+      <p>We take reasonable steps to protect your data, including encrypted passwords, HTTPS on all pages, and secure token storage for EVE SSO. However, no service is 100% secure. If a data breach occurs that affects your information, we will notify affected users promptly.</p>
+
+      <h2>10. Changes to This Policy</h2>
+      <p>We may update this Privacy Policy from time to time. When we do, we'll update the "Last updated" date at the top and notify users of major changes via the site or Discord.</p>
+
+      <h2>11. Contact</h2>
+      <p>Questions about your data or this privacy policy? Reach out via our <a href="https://discord.gg/CDnkc7GkgG" target="_blank">Discord community</a> in the #support channel.</p>
+
+      <p style="margin-top:40px;color:#8892a6;font-size:13px;">o7 capsuleer</p>
+    </div>
+  </main>
+
+  <footer>
+    <p>&copy; 2026 MMOBASE. All rights reserved. |
+      <a href="/terms-of-service">Terms of Service</a> |
+      <a href="/privacy-policy">Privacy Policy</a>
+    </p>
+  </footer>
+
+  <script>
+    const SUPABASE_URL = 'https://rfswlpozpwcrlnpymbsr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmc3dscG96cHdjcmxucHltYnNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1NDk3MTcsImV4cCI6MjA4NDEyNTcxN30._5pxb0WCJ0FBQ0_DA8BJjm5jCA9nxVDBn8IOGRjKnoI';
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+    async function checkUserSession() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && session.user) { updateUIForSignedInUser(session.user); }
+    }
+    function updateUIForSignedInUser(user) {
+      const a = document.getElementById('authButton');
+      a.textContent = 'Hi, ' + (user.user_metadata?.full_name || 'User').split(' ')[0];
+      a.onclick = (e) => toggleDropdown(e);
+    }
+    function toggleDropdown(e) { e.preventDefault(); e.stopPropagation(); document.getElementById('userDropdown').classList.toggle('show'); }
+    async function handleAuthClick(e) {
+      e.preventDefault();
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && session.user) { toggleDropdown(e); } else { window.location.href = '/dashboard'; }
+    }
+    async function handleSignOut(e) {
+      e.preventDefault();
+      const { error } = await supabaseClient.auth.signOut();
+      if (!error) {
+        document.getElementById('authButton').textContent = 'Get Started';
+        document.getElementById('authButton').onclick = (e) => handleAuthClick(e);
+        document.getElementById('userDropdown').classList.remove('show');
+      }
+    }
+    document.addEventListener('click', function(e) {
+      const ud = document.getElementById('userDropdown');
+      const um = document.querySelector('.user-menu');
+      if (ud && um && !um.contains(e.target)) ud.classList.remove('show');
+    });
+    function toggleDarkLight() {
+      var b = document.body, i = document.getElementById('modeIcon');
+      b.classList.toggle('light-mode');
+      if (b.classList.contains('light-mode')) {
+        i.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        localStorage.setItem('mmobase-theme', 'light');
+      } else {
+        i.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+        localStorage.setItem('mmobase-theme', 'dark');
+      }
+    }
+    function initTheme() {
+      var saved = localStorage.getItem('mmobase-theme');
+      if (saved === 'light') {
+        document.body.classList.add('light-mode');
+        var i = document.getElementById('modeIcon');
+        if (i) i.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      }
+    }
+    initTheme();
+    window.addEventListener('DOMContentLoaded', checkUserSession);
+  </script>
+
+  <!-- COOKIE CONSENT BANNER -->
+  <div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;width:100%;background:rgba(10,14,23,0.98);border-top:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(12px);padding:18px 48px;z-index:99999;font-family:Inter,sans-serif;">
+    <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;">
+      <p style="font-size:13px;color:#8892a6;margin:0;flex:1;line-height:1.6;min-width:280px;">We use cookies to keep you signed in and remember your preferences. No tracking, no ads. See our <a href="/privacy-policy" style="color:#00b4d8;text-decoration:none;">Privacy Policy</a> for details.</p>
+      <div style="display:flex;gap:10px;flex-shrink:0;">
+        <button onclick="acceptCookies()" style="padding:8px 22px;background:#00b4d8;color:#000;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;">Accept</button>
+        <button onclick="declineCookies()" style="padding:8px 22px;background:transparent;color:#8892a6;border:1px solid rgba(255,255,255,0.15);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;">Decline</button>
+      </div>
+    </div>
+  </div>
+  <style>
+    #cookieBanner.show{display:block !important;animation:slideUpCookie 0.4s ease}
+    @keyframes slideUpCookie{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    @keyframes slideDownCookie{from{transform:translateY(0);opacity:1}to{transform:translateY(100%);opacity:0}}
+    body.light-mode #cookieBanner{background:rgba(240,242,245,0.98);border-top-color:rgba(0,0,0,0.08)}
+    body.light-mode #cookieBanner p{color:#555}
+    body.light-mode #cookieBanner button:last-child{color:#666;border-color:rgba(0,0,0,0.15)}
+    @media(max-width:700px){#cookieBanner>div{flex-direction:column;gap:12px}#cookieBanner{padding:16px 20px}}
+      @media (max-height: 800px) { body { zoom: 0.84; } }
+    @media (max-height: 700px) { body { zoom: 0.78; } }
+    </style>
+  <script>
+    function acceptCookies(){localStorage.setItem('mmobase-cookies','accepted');closeCookieBanner()}
+    function declineCookies(){localStorage.setItem('mmobase-cookies','declined');closeCookieBanner()}
+    function closeCookieBanner(){var b=document.getElementById('cookieBanner');b.style.animation='slideDownCookie 0.3s ease forwards';setTimeout(function(){b.remove()},300)}
+    (function(){if(!localStorage.getItem('mmobase-cookies')){setTimeout(function(){document.getElementById('cookieBanner').classList.add('show')},1000)}})();
+  </script>
+
+
+  <!-- TOAST NOTIFICATION SYSTEM -->
+  <style>
+    .mmobase-toast{position:fixed;left:24px;bottom:12px;padding:14px 22px;border-radius:10px;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;z-index:100000;display:flex;align-items:center;gap:10px;max-width:380px;line-height:1.5;animation:toastSlideIn 0.4s ease;box-shadow:0 8px 32px rgba(0,0,0,0.25)}
+    .mmobase-toast.success{background:#0d2818;border:1px solid rgba(34,197,94,0.2);color:#4ade80}
+    .mmobase-toast.error{background:#2a0a0a;border:1px solid rgba(239,68,68,0.2);color:#f87171}
+    .mmobase-toast.info{background:#0a1628;border:1px solid rgba(0,180,216,0.2);color:#67d4e8}
+    .mmobase-toast.hiding{animation:toastSlideOut 0.3s ease forwards}
+    body.light-mode .mmobase-toast.success{background:#f0fdf4;border-color:rgba(34,197,94,0.3);color:#15803d}
+    body.light-mode .mmobase-toast.error{background:#fef2f2;border-color:rgba(239,68,68,0.3);color:#b91c1c}
+    body.light-mode .mmobase-toast.info{background:#f0f9ff;border-color:rgba(0,180,216,0.3);color:#0369a1}
+    @keyframes toastSlideIn{from{transform:translateX(-120%);opacity:0}to{transform:translateX(0);opacity:1}}
+    @keyframes toastSlideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(-120%);opacity:0}}
+    @media(max-width:700px){.mmobase-toast{left:12px;right:12px;max-width:none;bottom:80px}}
+      @media (max-height: 800px) { body { zoom: 0.84; } }
+    @media (max-height: 700px) { body { zoom: 0.78; } }
+    </style>
+  <script>
+    function showToast(message, type) {
+      type = type || 'info';
+      var existing = document.querySelectorAll('.mmobase-toast');
+      existing.forEach(function(t){t.remove()});
+      var icons = {success:'\u2713',error:'\u2715',info:'\u2139'};
+      var toast = document.createElement('div');
+      toast.className = 'mmobase-toast ' + type;
+      toast.innerHTML = '<span style="font-size:16px;font-weight:700;">' + icons[type] + '</span><span>' + message + '</span>';
+      document.body.appendChild(toast);
+      setTimeout(function(){toast.classList.add('hiding');setTimeout(function(){toast.remove()},300)},4000);
+    }
+  </script>
+
+
+  <script>
+    // v64 safe nav fix: one-shot repair only, no continuous watcher, no interval loop.
+    (function(){
+      function addTransparencyLinkOnce() {
+        var navs = document.querySelectorAll('header nav');
+        for (var i = 0; i < navs.length; i++) {
+          var nav = navs[i];
+          var links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+
+          var donations = links.find(function(a) {
+            var href = a.getAttribute('href') || '';
+            return href === 'donations' || href === '/donations' || href === 'donations.html' || href === '/donations.html';
+          });
+
+          if (!donations) continue;
+
+          var transparency = links.find(function(a) {
+            var href = a.getAttribute('href') || '';
+            return href === 'transparency' || href === '/transparency' || href === 'transparency.html' || href === '/transparency.html';
+          });
+
+          if (!transparency) {
+            transparency = document.createElement('a');
+            transparency.href = 'transparency';
+            transparency.textContent = 'Transparency';
+          } else {
+            transparency.textContent = 'Transparency';
+          }
+
+          if (transparency.nextElementSibling !== donations) {
+            nav.insertBefore(transparency, donations);
+          }
+        }
+      }
+
+      window.addTransparencyLinkOnce = addTransparencyLinkOnce;
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', addTransparencyLinkOnce);
+      } else {
+        addTransparencyLinkOnce();
+      }
+
+      window.addEventListener('load', function() {
+        addTransparencyLinkOnce();
+        setTimeout(addTransparencyLinkOnce, 300);
+        setTimeout(addTransparencyLinkOnce, 1200);
+        setTimeout(addTransparencyLinkOnce, 2500);
+      });
+    })();
+  </script>
+
+</body>
+</html>

@@ -1,0 +1,21 @@
+# Dependencies/build tooling if ever added
+node_modules/
+dist/
+build/
+
+# Environment / secrets
+.env
+.env.*
+!.env.example
+
+# Backups / temp files
+*.bak
+*.bak*
+*.swp
+*.swo
+
+# OS/editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

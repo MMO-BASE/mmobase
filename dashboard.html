@@ -1,0 +1,577 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Dashboard - MMOBASE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @media (max-height: 860px) { body { zoom: 0.84 !important; } }
+    @media (max-height: 700px) { body { zoom: 0.78 !important; } }
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+    body {
+      background: #0a0e17;
+      color: #ffffff;
+      overflow-x: hidden;
+      min-height: 100vh;
+    }
+
+    /* NAVBAR */
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 20px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 9999;
+      background: rgba(10, 14, 23, 0.98);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+    .logo {
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 0.5px;
+    }
+    nav {
+      display: flex;
+      align-items: center;
+    }
+    nav a {
+      color: #cccccc;
+      text-decoration: none;
+      margin-left: 28px;
+      font-size: 15px;
+      transition: color 0.2s ease;
+    }
+    nav a:hover {
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+      color: white;
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    }
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    .nav-cta {
+      padding: 10px 18px;
+      background: white;
+      color: black;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .mode-toggle {
+      background: transparent;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      margin-left: 14px;
+      transition: color 0.2s ease;
+      vertical-align: middle;
+      line-height: 1;
+      color: #cccccc;
+      font-size: 15px;
+    }
+    .mode-toggle:hover {
+      color: white;
+    }
+    .mode-toggle svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      vertical-align: middle;
+    }
+    .user-menu {
+      position: relative;
+      display: inline-block;
+    }
+    .user-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+      min-width: 160px;
+      overflow: hidden;
+      z-index: 1000;
+    }
+    .user-dropdown.show {
+      display: block;
+    }
+    .user-dropdown a {
+      display: block;
+      padding: 10px 16px;
+      color: #1a1a1a;
+      text-decoration: none;
+      font-size: 13px;
+      transition: background 0.2s ease;
+      margin: 0;
+    }
+    .user-dropdown a:hover {
+      background: rgba(0, 180, 216, 0.08);
+    }
+    .user-dropdown hr {
+      margin: 4px 0;
+      border: none;
+      border-top: 1px solid rgba(0, 0, 0, 0.06);
+    }
+
+    /* LOGIN PAGE */
+    main {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      min-height: 100vh;
+      padding: 100px 40px 40px;
+    }
+
+    .login-card {
+      text-align: center;
+      max-width: 440px;
+      width: 100%;
+      animation: fadeUp 0.6s ease;
+    }
+
+    .login-icon {
+      width: 90px;
+      height: 90px;
+      margin: 0 auto 28px;
+      background: linear-gradient(135deg, rgba(0, 180, 216, 0.15), rgba(0, 180, 216, 0.05));
+      border-radius: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border: 1px solid rgba(0, 180, 216, 0.2);
+    }
+    .login-icon span {
+      font-size: 36px;
+      color: #00b4d8;
+    }
+
+    .login-card h1 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 10px;
+    }
+
+    .login-card p {
+      font-size: 15px;
+      color: #8892a6;
+      line-height: 1.6;
+      margin-bottom: 36px;
+    }
+
+    .eve-sso-btn {
+      display: inline-block;
+      padding: 14px 36px;
+      background: #00b4d8;
+      color: #000;
+      border: none;
+      border-radius: 12px;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      text-decoration: none;
+      box-shadow: 0 10px 30px rgba(0, 180, 216, 0.3);
+    }
+    .eve-sso-btn:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 14px 40px rgba(0, 180, 216, 0.4);
+    }
+
+    .demo-link {
+      display: block;
+      margin-top: 20px;
+      font-size: 13px;
+      color: #555d6e;
+      text-decoration: none;
+      transition: color 0.2s ease;
+    }
+    .demo-link:hover {
+      color: #8892a6;
+    }
+
+    /* LIGHT MODE */
+    body.light-mode {
+      background: #f0f2f5;
+      color: #1a1a1a;
+    }
+    body.light-mode header {
+      background: rgba(240, 242, 245, 0.98);
+      border-bottom-color: rgba(0, 0, 0, 0.08);
+    }
+    body.light-mode nav a {
+      color: #666666;
+    }
+    body.light-mode nav a:hover {
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+      color: #1a1a1a;
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    }
+    .nav-cta:hover { color: black !important; opacity: 0.85; }
+    body.light-mode .logo {
+      color: #1a1a1a;
+    }
+    body.light-mode .nav-cta {
+      background: #1a1a1a;
+      color: white;
+    }
+    body.light-mode .mode-toggle {
+      color: #666666;
+    }
+    body.light-mode .mode-toggle:hover {
+      color: #1a1a1a;
+    }
+    body.light-mode .login-card h1 {
+      color: #1a1a1a;
+    }
+    body.light-mode .login-card p {
+      color: #555555;
+    }
+    body.light-mode .demo-link {
+      color: #999999;
+    }
+    body.light-mode .demo-link:hover {
+      color: #555555;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @media (max-width: 700px) {
+      header { padding: 16px 24px; }
+      main { padding: 80px 24px 24px; }
+      .login-card h1 { font-size: 24px; }
+    }
+    </style>
+  <link rel="icon" type="image/png" href="/favicon.png">
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-V431CY30BX"></script>
+<script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-V431CY30BX");</script>
+</head>
+<body>
+<!-- MMOBASE BUILD transparency-v67-dropdown-html-route-fix-20260520_0232 -->
+<header>
+    <div class="logo">MMOBASE</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="https://v2.mmobase.co.uk/transparency">Transparency</a>
+      <a href="https://v2.mmobase.co.uk/donations">Donations</a>
+      <div class="user-menu">
+        <a href="#" class="nav-cta" id="authButton" onclick="handleAuthClick(event)">Get Started</a>
+        <div class="user-dropdown" id="userDropdown">
+          <a href="/profile">Profile</a>
+          <a href="/settings">Settings</a>
+          <hr>
+          <a href="#" onclick="handleSignOut(event)">Sign Out</a>
+        </div>
+      </div>
+      <button class="mode-toggle" id="modeToggle" onclick="toggleDarkLight()" title="Toggle light/dark mode"><svg id="modeIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+    </nav>
+  </header>
+
+  <main>
+    <div class="login-card">
+      <div class="login-icon"><span>&#x2B21;</span></div>
+      <h1>Log in to access your dashboard</h1>
+      <p>Connect your EVE Online account to view your character stats, assets, wallet, market data, and more.</p>
+      <a href="#" class="eve-sso-btn" onclick="handleEveLogin(event)">Log in with EVE Online</a>
+      <a href="/demo" class="demo-link">or try the demo with sample data</a>
+    </div>
+  </main>
+
+  <script>
+    const SUPABASE_URL = 'https://rfswlpozpwcrlnpymbsr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJmc3dscG96cHdjcmxucHltYnNyIiwicm9sZSI6ImFub24iLCJpYXQiOjE3Njg1NDk3MTcsImV4cCI6MjA4NDEyNTcxN30._5pxb0WCJ0FBQ0_DA8BJjm5jCA9nxVDBn8IOGRjKnoI';
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function checkUserSession() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && session.user) { updateUIForSignedInUser(session.user); try { var r = await fetch("/api/characters", {headers:{"Authorization":"Bearer "+session.access_token}}); var d = await r.json(); if (d.characters && d.characters.length > 0) { window.location.href = "/real-dashboard"; return; } } catch(e){} }
+    }
+    function updateUIForSignedInUser(user) {
+      const a = document.getElementById('authButton');
+      a.textContent = 'Hi, ' + (user.user_metadata?.full_name || 'User').split(' ')[0];
+      a.onclick = (e) => toggleDropdown(e);
+    }
+    function toggleDropdown(e) {
+      e.preventDefault(); e.stopPropagation();
+      document.getElementById('userDropdown').classList.toggle('show');
+    }
+    async function handleAuthClick(e) {
+      e.preventDefault();
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && session.user) { toggleDropdown(e); } else { openModal(); }
+    }
+    async function handleEveLogin(e) {
+      e.preventDefault();
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && session.user) {
+        // User is logged in to MMOBASE - proceed to EVE SSO (placeholder)
+        window.location.href = "/auth/eve?token=" + session.access_token;
+      } else {
+        // Need to sign up/sign in to MMOBASE first
+        openModal();
+      }
+    }
+    function openModal() {
+      var m = document.getElementById('authModal');
+      m.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeModal() {
+      var m = document.getElementById('authModal');
+      m.style.display = 'none';
+      document.body.style.overflow = 'auto';
+    }
+    function closeModalOnOverlay(e) {
+      if (e.target === document.getElementById('authModal')) closeModal();
+    }
+    function showSignUp() {
+      document.getElementById('signUpForm').style.display = 'block';
+      document.getElementById('signInForm').style.display = 'none';
+      var btns = document.querySelectorAll('.toggle-btn');
+      btns[0].style.background = 'white'; btns[0].style.color = '#1a1a1a'; btns[0].style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+      btns[1].style.background = 'transparent'; btns[1].style.color = '#666'; btns[1].style.boxShadow = 'none';
+    }
+    function showSignIn() {
+      document.getElementById('signInForm').style.display = 'block';
+      document.getElementById('signUpForm').style.display = 'none';
+      var btns = document.querySelectorAll('.toggle-btn');
+      btns[1].style.background = 'white'; btns[1].style.color = '#1a1a1a'; btns[1].style.boxShadow = '0 2px 8px rgba(0,0,0,0.08)';
+      btns[0].style.background = 'transparent'; btns[0].style.color = '#666'; btns[0].style.boxShadow = 'none';
+    }
+    async function handleSignUp(e) {
+      e.preventDefault();
+      const name = document.getElementById('signup-name').value;
+      const email = document.getElementById('signup-email').value;
+      const password = document.getElementById('signup-password').value;
+      try {
+        const { data, error } = await supabaseClient.auth.signUp({ email, password, options: { data: { full_name: name } } });
+        if (error) throw error;
+        if(data.session) { showToast('Account created! Welcome to MMOBASE.', 'success'); setTimeout(function(){ location.reload(); }, 1500); } else { showToast('Account created! Check your email to confirm.', 'success'); }
+        closeModal();
+      } catch (err) { showToast(err.message, 'error'); }
+    }
+    async function handleSignIn(e) {
+      e.preventDefault();
+      const email = document.getElementById('signin-email').value;
+      const password = document.getElementById('signin-password').value;
+      try {
+        const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
+        if (error) throw error;
+        closeModal();
+        updateUIForSignedInUser(data.user);
+        showToast('Welcome back! You can now link your EVE account.', 'success');
+      } catch (err) { showToast(err.message, 'error'); }
+    }
+    document.addEventListener('keydown', function(e) { if (e.key === 'Escape') closeModal(); });
+    async function handleSignOut(e) {
+      e.preventDefault();
+      const { error } = await supabaseClient.auth.signOut();
+      if (!error) {
+        document.getElementById('authButton').textContent = 'Get Started';
+        document.getElementById('authButton').onclick = (e) => handleAuthClick(e);
+        document.getElementById('userDropdown').classList.remove('show');
+      }
+    }
+    document.addEventListener('click', function(e) {
+      const ud = document.getElementById('userDropdown');
+      const um = document.querySelector('.user-menu');
+      if (ud && um && !um.contains(e.target)) ud.classList.remove('show');
+    });
+
+    function toggleDarkLight() {
+      var b = document.body, i = document.getElementById('modeIcon');
+      b.classList.toggle('light-mode');
+      if (b.classList.contains('light-mode')) {
+        i.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        localStorage.setItem('mmobase-theme', 'light');
+      } else {
+        i.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+        localStorage.setItem('mmobase-theme', 'dark');
+      }
+    }
+    function initTheme() {
+      var saved = localStorage.getItem('mmobase-theme');
+      if (saved === 'light') {
+        document.body.classList.add('light-mode');
+        var i = document.getElementById('modeIcon');
+        if (i) i.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      }
+    }
+
+    async function handleForgotPassword(e) {
+      e.preventDefault();
+      var email = document.getElementById('signin-email');
+      if (!email || !email.value) {
+        showToast('Please enter your email address first.', 'error');
+        return;
+      }
+      try {
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email.value, {
+          redirectTo: 'https://v2.mmobase.co.uk'
+        });
+        if (error) throw error;
+        showToast('Password reset email sent. Check your inbox.', 'success');
+      } catch(err) {
+        showToast(err.message, 'error');
+      }
+    }
+    initTheme();
+    window.addEventListener('DOMContentLoaded', checkUserSession);
+  </script>
+
+  <div id="authModal" class="modal-overlay" onclick="closeModalOnOverlay(event)" style="display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.7);backdrop-filter:blur(8px);z-index:10000;justify-content:center;align-items:center;padding:20px;">
+    <div style="background:#fff;border-radius:24px;width:100%;max-width:440px;padding:48px;position:relative;box-shadow:0 20px 60px rgba(0,0,0,0.3);animation:fadeUp 0.3s ease;">
+      <button onclick="closeModal()" style="position:absolute;top:20px;right:20px;background:transparent;border:none;font-size:28px;color:#666;cursor:pointer;width:32px;height:32px;display:flex;align-items:center;justify-content:center;border-radius:50%;">&times;</button>
+      <div style="text-align:center;margin-bottom:40px;">
+        <h1 style="font-size:32px;font-weight:700;margin-bottom:8px;color:#1a1a1a;">Welcome to MMOBASE</h1>
+        <p style="font-size:16px;color:#666;">Track your empire across the stars</p>
+      </div>
+      <div style="display:flex;gap:8px;background:rgba(107,138,255,0.08);border-radius:12px;padding:6px;margin-bottom:32px;">
+        <button class="toggle-btn active" onclick="showSignUp()" style="flex:1;padding:12px;border:none;background:white;border-radius:8px;font-size:15px;font-weight:600;color:#1a1a1a;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,0.08);">Sign Up</button>
+        <button class="toggle-btn" onclick="showSignIn()" style="flex:1;padding:12px;border:none;background:transparent;border-radius:8px;font-size:15px;font-weight:600;color:#666;cursor:pointer;">Sign In</button>
+      </div>
+      <form id="signUpForm" class="auth-form active" style="display:block;" onsubmit="handleSignUp(event)">
+        <div style="margin-bottom:20px;"><label style="display:block;font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:8px;">Display Name</label><input type="text" id="signup-name" placeholder="Enter a display name" required style="width:100%;padding:14px 16px;border:1px solid rgba(0,0,0,0.15);border-radius:10px;font-size:15px;color:#1a1a1a;"></div>
+        <div style="margin-bottom:20px;"><label style="display:block;font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:8px;">Email</label><input type="email" id="signup-email" placeholder="Enter your email" required style="width:100%;padding:14px 16px;border:1px solid rgba(0,0,0,0.15);border-radius:10px;font-size:15px;color:#1a1a1a;"></div>
+        <div style="margin-bottom:20px;"><label style="display:block;font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:8px;">Password</label><input type="password" id="signup-password" placeholder="Create a password" required style="width:100%;padding:14px 16px;border:1px solid rgba(0,0,0,0.15);border-radius:10px;font-size:15px;color:#1a1a1a;"></div>
+        <button type="submit" style="width:100%;padding:16px;background:#1a1a1a;color:white;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;margin-top:8px;">Create Account</button>
+      </form>
+      <form id="signInForm" class="auth-form" style="display:none;" onsubmit="handleSignIn(event)">
+        <div style="margin-bottom:20px;"><label style="display:block;font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:8px;">Email</label><input type="email" id="signin-email" placeholder="Enter your email" required style="width:100%;padding:14px 16px;border:1px solid rgba(0,0,0,0.15);border-radius:10px;font-size:15px;color:#1a1a1a;"></div>
+        <div style="margin-bottom:20px;"><label style="display:block;font-size:14px;font-weight:600;color:#1a1a1a;margin-bottom:8px;">Password</label><input type="password" id="signin-password" placeholder="Enter your password" required style="width:100%;padding:14px 16px;border:1px solid rgba(0,0,0,0.15);border-radius:10px;font-size:15px;color:#1a1a1a;"></div>
+        <div style="text-align:right;margin-top:-12px;margin-bottom:16px;"><a href="#" onclick="handleForgotPassword(event)" style="font-size:13px;color:#6b8aff;text-decoration:none;">Forgot password?</a></div>
+        <button type="submit" style="width:100%;padding:16px;background:#1a1a1a;color:white;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;margin-top:8px;">Sign In</button>
+      </form>
+      <div style="text-align:center;margin-top:24px;font-size:14px;color:#666;">By continuing, you agree to our <a href="/terms-of-service" style="color:#6b8aff;text-decoration:none;font-weight:600;">Terms</a> and <a href="/privacy-policy" style="color:#6b8aff;text-decoration:none;font-weight:600;">Privacy Policy</a></div>
+    </div>
+  </div>
+
+
+  <!-- COOKIE CONSENT BANNER -->
+  <div id="cookieBanner" style="display:none;position:fixed;bottom:0;left:0;width:100%;background:rgba(10,14,23,0.98);border-top:1px solid rgba(255,255,255,0.08);backdrop-filter:blur(12px);padding:18px 48px;z-index:99999;font-family:Inter,sans-serif;">
+    <div style="max-width:1200px;margin:0 auto;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;">
+      <p style="font-size:13px;color:#8892a6;margin:0;flex:1;line-height:1.6;min-width:280px;">We use cookies to keep you signed in and remember your preferences. No tracking, no ads. See our <a href="/privacy-policy" style="color:#00b4d8;text-decoration:none;">Privacy Policy</a> for details.</p>
+      <div style="display:flex;gap:10px;flex-shrink:0;">
+        <button onclick="acceptCookies()" style="padding:8px 22px;background:#00b4d8;color:#000;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;">Accept</button>
+        <button onclick="declineCookies()" style="padding:8px 22px;background:transparent;color:#8892a6;border:1px solid rgba(255,255,255,0.15);border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;transition:all 0.2s;">Decline</button>
+      </div>
+    </div>
+  </div>
+  <style>
+    #cookieBanner.show{display:block !important;animation:slideUpCookie 0.4s ease}
+    @keyframes slideUpCookie{from{transform:translateY(100%)}to{transform:translateY(0)}}
+    @keyframes slideDownCookie{from{transform:translateY(0);opacity:1}to{transform:translateY(100%);opacity:0}}
+    body.light-mode #cookieBanner{background:rgba(240,242,245,0.98);border-top-color:rgba(0,0,0,0.08)}
+    body.light-mode #cookieBanner p{color:#555}
+    body.light-mode #cookieBanner button:last-child{color:#666;border-color:rgba(0,0,0,0.15)}
+    @media(max-width:700px){#cookieBanner>div{flex-direction:column;gap:12px}#cookieBanner{padding:16px 20px}}
+    </style>
+  <script>
+    function acceptCookies(){localStorage.setItem('mmobase-cookies','accepted');closeCookieBanner()}
+    function declineCookies(){localStorage.setItem('mmobase-cookies','declined');closeCookieBanner()}
+    function closeCookieBanner(){var b=document.getElementById('cookieBanner');b.style.animation='slideDownCookie 0.3s ease forwards';setTimeout(function(){b.remove()},300)}
+    (function(){if(!localStorage.getItem('mmobase-cookies')){setTimeout(function(){document.getElementById('cookieBanner').classList.add('show')},1000)}})();
+  </script>
+
+
+  <!-- TOAST NOTIFICATION SYSTEM -->
+  <style>
+    .mmobase-toast{position:fixed;left:24px;bottom:12px;padding:14px 22px;border-radius:10px;font-size:13px;font-weight:500;font-family:'Inter',sans-serif;z-index:100000;display:flex;align-items:center;gap:10px;max-width:380px;line-height:1.5;animation:toastSlideIn 0.4s ease;box-shadow:0 8px 32px rgba(0,0,0,0.25)}
+    .mmobase-toast.success{background:#0d2818;border:1px solid rgba(34,197,94,0.2);color:#4ade80}
+    .mmobase-toast.error{background:#2a0a0a;border:1px solid rgba(239,68,68,0.2);color:#f87171}
+    .mmobase-toast.info{background:#0a1628;border:1px solid rgba(0,180,216,0.2);color:#67d4e8}
+    .mmobase-toast.hiding{animation:toastSlideOut 0.3s ease forwards}
+    body.light-mode .mmobase-toast.success{background:#f0fdf4;border-color:rgba(34,197,94,0.3);color:#15803d}
+    body.light-mode .mmobase-toast.error{background:#fef2f2;border-color:rgba(239,68,68,0.3);color:#b91c1c}
+    body.light-mode .mmobase-toast.info{background:#f0f9ff;border-color:rgba(0,180,216,0.3);color:#0369a1}
+    @keyframes toastSlideIn{from{transform:translateX(-120%);opacity:0}to{transform:translateX(0);opacity:1}}
+    @keyframes toastSlideOut{from{transform:translateX(0);opacity:1}to{transform:translateX(-120%);opacity:0}}
+    @media(max-width:700px){.mmobase-toast{left:12px;right:12px;max-width:none;bottom:80px}}
+    </style>
+  <script>
+    function showToast(message, type) {
+      type = type || 'info';
+      var existing = document.querySelectorAll('.mmobase-toast');
+      existing.forEach(function(t){t.remove()});
+      var icons = {success:'\u2713',error:'\u2715',info:'\u2139'};
+      var toast = document.createElement('div');
+      toast.className = 'mmobase-toast ' + type;
+      toast.innerHTML = '<span style="font-size:16px;font-weight:700;">' + icons[type] + '</span><span>' + message + '</span>';
+      document.body.appendChild(toast);
+      setTimeout(function(){toast.classList.add('hiding');setTimeout(function(){toast.remove()},300)},4000);
+    }
+  </script>
+
+
+  <script>
+    // v64 safe nav fix: one-shot repair only, no continuous watcher, no interval loop.
+    (function(){
+      function addTransparencyLinkOnce() {
+        var navs = document.querySelectorAll('header nav');
+        for (var i = 0; i < navs.length; i++) {
+          var nav = navs[i];
+          var links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+
+          var donations = links.find(function(a) {
+            var href = a.getAttribute('href') || '';
+            return href === 'donations' || href === '/donations' || href === 'donations.html' || href === '/donations.html';
+          });
+
+          if (!donations) continue;
+
+          var transparency = links.find(function(a) {
+            var href = a.getAttribute('href') || '';
+            return href === 'transparency' || href === '/transparency' || href === 'transparency.html' || href === '/transparency.html';
+          });
+
+          if (!transparency) {
+            transparency = document.createElement('a');
+            transparency.href = 'transparency';
+            transparency.textContent = 'Transparency';
+          } else {
+            transparency.textContent = 'Transparency';
+          }
+
+          if (transparency.nextElementSibling !== donations) {
+            nav.insertBefore(transparency, donations);
+          }
+        }
+      }
+
+      window.addTransparencyLinkOnce = addTransparencyLinkOnce;
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', addTransparencyLinkOnce);
+      } else {
+        addTransparencyLinkOnce();
+      }
+
+      window.addEventListener('load', function() {
+        addTransparencyLinkOnce();
+        setTimeout(addTransparencyLinkOnce, 300);
+        setTimeout(addTransparencyLinkOnce, 1200);
+        setTimeout(addTransparencyLinkOnce, 2500);
+      });
+    })();
+  </script>
+
+</body>
+</html>

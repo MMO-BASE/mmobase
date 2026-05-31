@@ -1,0 +1,1312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Transparency - MMOBASE</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="MMOBASE transparency page explaining EVE Online SSO, ESI permissions, open source GitHub repositories, data access and security in plain English.">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <style>
+    @media (max-height: 860px) { body { zoom: 0.84 !important; } }
+    @media (max-height: 700px) { body { zoom: 0.78 !important; } }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    :root {
+      --bg: #0b0b10;
+      --panel: rgba(255,255,255,0.03);
+      --panel-strong: rgba(255,255,255,0.045);
+      --border: rgba(255,255,255,0.08);
+      --border-soft: rgba(255,255,255,0.055);
+      --text: #ffffff;
+      --muted: #aaaaaa;
+      --muted-2: #8892a6;
+      --dim: #666666;
+      --accent: #00b4d8;
+      --accent-2: #6b8aff;
+      --green: #4ade80;
+      --yellow: #f4c430;
+      --red: #f87171;
+      --mono: 'JetBrains Mono', monospace;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      overflow-x: hidden;
+      position: relative;
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-image: radial-gradient(circle, rgba(107, 138, 255, 0.25) 1.5px, transparent 1.5px);
+      background-size: 30px 30px;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    body::after {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: radial-gradient(ellipse at 30% 40%, rgba(107, 138, 255, 0.12) 0%, transparent 55%);
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    header, main, footer {
+      position: relative;
+      z-index: 1;
+    }
+
+    header {
+      position: fixed;
+      top: 0;
+      width: 100%;
+      padding: 20px 48px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      z-index: 9999;
+      background: rgba(10, 14, 23, 0.98);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .logo {
+      font-weight: 700;
+      font-size: 20px;
+      letter-spacing: 0.5px;
+    }
+
+    nav {
+      display: flex;
+      align-items: center;
+    }
+
+    nav a {
+      color: #cccccc;
+      text-decoration: none;
+      margin-left: 28px;
+      font-size: 15px;
+      transition: color 0.2s ease;
+    }
+
+    nav a:hover,
+    nav a.active {
+      color: white;
+    }
+
+    .nav-cta {
+      padding: 10px 18px;
+      background: white;
+      color: black !important;
+      border-radius: 10px;
+      font-weight: 600;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+    }
+
+    .nav-cta:hover {
+      color: black !important;
+      opacity: 0.85;
+    }
+
+    .mode-toggle {
+      background: transparent;
+      border: none;
+      padding: 0;
+      cursor: pointer;
+      margin-left: 14px;
+      transition: color 0.2s ease;
+      color: #cccccc;
+    }
+
+    .mode-toggle:hover {
+      color: white;
+    }
+
+    .mode-toggle svg {
+      width: 18px;
+      height: 18px;
+      stroke: currentColor;
+      fill: none;
+      stroke-width: 2;
+      vertical-align: middle;
+    }
+
+    .user-menu {
+      position: relative;
+      display: inline-block;
+    }
+
+    .user-dropdown {
+      display: none;
+      position: absolute;
+      top: calc(100% + 8px);
+      left: 0;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+      min-width: 180px;
+      animation: dropdownSlide 0.2s ease;
+      z-index: 1000;
+      border: 1px solid rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+    }
+
+    .user-dropdown.show {
+      display: block;
+    }
+
+    .user-dropdown a {
+      display: block;
+      padding: 12px 20px;
+      color: #1a1a1a;
+      text-decoration: none;
+      font-size: 14px;
+      transition: background 0.2s ease;
+      margin: 0;
+    }
+
+    .user-dropdown a:hover {
+      background: rgba(107, 138, 255, 0.08);
+      color: #1a1a1a;
+    }
+
+    .user-dropdown hr {
+      margin: 4px 0;
+      border: none;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    @keyframes dropdownSlide {
+      from { opacity: 0; transform: translateY(-10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    main {
+      padding-top: 100px;
+    }
+
+    .hero-section {
+      padding: 80px 64px 70px;
+      text-align: center;
+      animation: fadeIn 0.8s ease;
+    }
+
+    .hero-section h1 {
+      font-size: 56px;
+      font-weight: 700;
+      margin-bottom: 20px;
+      line-height: 1.2;
+      background: linear-gradient(135deg, #ffffff 0%, #cccccc 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .hero-section p {
+      font-size: 18px;
+      color: #aaaaaa;
+      max-width: 760px;
+      margin: 0 auto 32px;
+      line-height: 1.6;
+    }
+
+    .hero-note {
+      display: inline-block;
+      padding: 9px 14px;
+      border: 1px solid rgba(0, 180, 216, 0.18);
+      background: rgba(0, 180, 216, 0.055);
+      color: #89dff0;
+      border-radius: 12px;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .section {
+      padding: 70px 64px;
+    }
+
+    .section.alt {
+      background: linear-gradient(180deg, rgba(80, 100, 220, 0.05) 0%, rgba(11, 11, 16, 0) 100%);
+    }
+
+    .section-inner {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .narrow {
+      max-width: 880px;
+      margin: 0 auto;
+    }
+
+    .section-title {
+      font-size: 42px;
+      font-weight: 700;
+      margin-bottom: 22px;
+      text-align: center;
+    }
+
+    .section-subtitle {
+      max-width: 760px;
+      margin: 0 auto 44px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 16px;
+      line-height: 1.7;
+    }
+
+    .feature-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 40px;
+    }
+
+    .feature-grid.two {
+      grid-template-columns: repeat(2, 1fr);
+    }
+
+    .feature-card {
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 34px 40px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+      min-height: 210px;
+    }
+
+    .feature-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(107, 138, 255, 0.3);
+      transform: translateY(-6px);
+      box-shadow: 0 20px 40px rgba(107, 138, 255, 0.1);
+    }
+
+    .feature-accent {
+      width: 32px;
+      height: 3px;
+      background: #6b8aff;
+      border-radius: 2px;
+      margin-bottom: 20px;
+    }
+
+    .feature-card h3 {
+      font-size: 20px;
+      font-weight: 700;
+      margin-bottom: 12px;
+      color: #ffffff;
+    }
+
+    .feature-card p {
+      font-size: 15px;
+      color: #aaaaaa;
+      line-height: 1.65;
+    }
+
+    .feature-card ul {
+      list-style: none;
+      margin-top: 16px;
+    }
+
+    .feature-card li {
+      color: #cccccc;
+      font-size: 14px;
+      line-height: 1.65;
+      margin-bottom: 10px;
+      padding-left: 22px;
+      position: relative;
+    }
+
+    .feature-card li::before {
+      content: "";
+      position: absolute;
+      left: 0;
+      top: 10px;
+      width: 7px;
+      height: 7px;
+      background: #6b8aff;
+      border-radius: 50%;
+    }
+
+    .plain-panel {
+      background: rgba(0, 180, 216, 0.04);
+      border: 1px solid rgba(0, 180, 216, 0.12);
+      border-radius: 16px;
+      padding: 34px 40px;
+      max-width: 960px;
+      margin: 0 auto;
+    }
+
+    .plain-panel h2 {
+      font-size: 28px;
+      font-weight: 700;
+      margin-bottom: 16px;
+    }
+
+    .plain-panel p {
+      color: #aaaaaa;
+      font-size: 16px;
+      line-height: 1.75;
+    }
+
+    .flow-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 24px;
+      counter-reset: step;
+    }
+
+    .flow-card {
+      counter-increment: step;
+      background: rgba(255,255,255,0.025);
+      border: 1px solid rgba(255,255,255,0.075);
+      border-radius: 16px;
+      padding: 28px;
+      min-height: 190px;
+    }
+
+    .flow-card::before {
+      content: counter(step);
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 30px;
+      height: 30px;
+      border-radius: 8px;
+      background: rgba(0,180,216,0.14);
+      color: var(--accent);
+      font-family: var(--mono);
+      font-weight: 700;
+      font-size: 13px;
+      margin-bottom: 18px;
+    }
+
+    .flow-card h3 {
+      font-size: 18px;
+      margin-bottom: 10px;
+    }
+
+    .flow-card p {
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .scope-list {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .scope-list span {
+      color: #8892a6;
+      border: 1px solid rgba(255,255,255,0.08);
+      border-radius: 8px;
+      padding: 6px 9px;
+      font-family: var(--mono);
+      font-size: 11px;
+      background: rgba(255,255,255,0.025);
+    }
+
+    .commitment-list {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 18px;
+    }
+
+    .commitment {
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.03);
+      border-radius: 14px;
+      padding: 22px;
+    }
+
+    .commitment h3 {
+      font-size: 17px;
+      margin-bottom: 8px;
+    }
+
+    .commitment p {
+      color: #aaaaaa;
+      font-size: 14px;
+      line-height: 1.65;
+    }
+
+    .reddit-box {
+      max-width: 980px;
+      margin: 0 auto;
+      border: 1px solid rgba(107, 138, 255, 0.18);
+      background: linear-gradient(135deg, rgba(107, 138, 255, 0.08) 0%, rgba(0, 180, 216, 0.04) 100%);
+      border-radius: 16px;
+      padding: 40px;
+      text-align: center;
+    }
+
+    .reddit-box h2 {
+      font-size: 32px;
+      margin-bottom: 16px;
+    }
+
+    .reddit-box p {
+      color: #aaaaaa;
+      line-height: 1.75;
+      font-size: 16px;
+      max-width: 780px;
+      margin: 0 auto;
+    }
+
+    .mono-note {
+      margin-top: 22px;
+      padding: 14px 16px;
+      border-radius: 10px;
+      border: 1px solid rgba(0,180,216,0.16);
+      background: rgba(0,180,216,0.055);
+      color: #8edff0;
+      font-family: var(--mono);
+      font-size: 12px;
+      line-height: 1.65;
+      text-align: left;
+    }
+
+
+    .trust-row {
+      display: flex;
+      justify-content: center;
+      gap: 12px;
+      flex-wrap: wrap;
+      margin-top: 28px;
+    }
+
+    .trust-pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 9px 13px;
+      border: 1px solid rgba(255,255,255,0.08);
+      background: rgba(255,255,255,0.035);
+      border-radius: 999px;
+      color: #d7defa;
+      font-size: 13px;
+      font-weight: 600;
+    }
+
+    .trust-pill span {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--green);
+      box-shadow: 0 0 18px rgba(74, 222, 128, 0.45);
+    }
+
+    .repo-grid {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 28px;
+      max-width: 980px;
+      margin: 0 auto;
+    }
+
+    .repo-card {
+      position: relative;
+      overflow: hidden;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 18px;
+      padding: 34px 36px;
+      min-height: 250px;
+      transition: all 0.3s ease;
+      backdrop-filter: blur(10px);
+    }
+
+    .repo-card::after {
+      content: '';
+      position: absolute;
+      top: -80px;
+      right: -80px;
+      width: 180px;
+      height: 180px;
+      background: radial-gradient(circle, rgba(0, 180, 216, 0.14) 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .repo-card:hover {
+      background: rgba(255, 255, 255, 0.06);
+      border-color: rgba(107, 138, 255, 0.32);
+      transform: translateY(-6px);
+      box-shadow: 0 22px 44px rgba(107, 138, 255, 0.12);
+    }
+
+    .repo-kicker {
+      color: var(--accent);
+      font-family: var(--mono);
+      font-size: 12px;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+      text-transform: uppercase;
+      margin-bottom: 12px;
+    }
+
+    .repo-card h3 {
+      font-size: 24px;
+      margin-bottom: 12px;
+    }
+
+    .repo-card p {
+      color: #aaaaaa;
+      line-height: 1.65;
+      font-size: 15px;
+      margin-bottom: 22px;
+    }
+
+    .repo-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: auto;
+    }
+
+    .repo-button,
+    .secondary-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      text-decoration: none;
+      border-radius: 10px;
+      padding: 11px 15px;
+      font-size: 14px;
+      font-weight: 700;
+      transition: all 0.2s ease;
+    }
+
+    .repo-button {
+      background: #ffffff;
+      color: #05070d;
+    }
+
+    .repo-button:hover {
+      transform: translateY(-2px);
+      opacity: 0.9;
+    }
+
+    .secondary-button {
+      border: 1px solid rgba(255,255,255,0.1);
+      color: #d9e1ff;
+      background: rgba(255,255,255,0.035);
+    }
+
+    .secondary-button:hover {
+      border-color: rgba(107, 138, 255, 0.35);
+      background: rgba(107, 138, 255, 0.08);
+    }
+
+    .mini-grid {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 18px;
+      max-width: 1080px;
+      margin: 0 auto;
+    }
+
+    .mini-card {
+      border: 1px solid rgba(255,255,255,0.075);
+      background: rgba(255,255,255,0.028);
+      border-radius: 16px;
+      padding: 24px;
+      min-height: 160px;
+    }
+
+    .mini-card strong {
+      display: block;
+      font-size: 16px;
+      margin-bottom: 9px;
+      color: #ffffff;
+    }
+
+    .mini-card p {
+      color: #aaaaaa;
+      font-size: 14px;
+      line-height: 1.6;
+    }
+
+    .warning-panel {
+      max-width: 980px;
+      margin: 0 auto;
+      border: 1px solid rgba(244, 196, 48, 0.16);
+      background: rgba(244, 196, 48, 0.055);
+      border-radius: 16px;
+      padding: 32px 38px;
+    }
+
+    .warning-panel h2 {
+      font-size: 28px;
+      margin-bottom: 14px;
+    }
+
+    .warning-panel p {
+      color: #d7cfa4;
+      line-height: 1.75;
+      font-size: 15px;
+    }
+
+    .link-list {
+      display: grid;
+      gap: 12px;
+      margin-top: 18px;
+    }
+
+    .link-list a {
+      color: #8edff0;
+      text-decoration: none;
+      font-family: var(--mono);
+      font-size: 13px;
+      border: 1px solid rgba(0, 180, 216, 0.15);
+      background: rgba(0, 180, 216, 0.045);
+      padding: 12px 14px;
+      border-radius: 10px;
+      overflow-wrap: anywhere;
+    }
+
+    .link-list a:hover {
+      border-color: rgba(0, 180, 216, 0.35);
+      background: rgba(0, 180, 216, 0.075);
+    }
+
+    footer {
+      padding: 60px 64px;
+      border-top: 1px solid rgba(255, 255, 255, 0.05);
+      text-align: center;
+      color: #777777;
+      font-size: 14px;
+    }
+
+    footer a {
+      color: #777777;
+      text-decoration: none;
+      margin: 0 12px;
+    }
+
+    footer a:hover {
+      color: var(--accent);
+    }
+
+    body.light-mode {
+      background: #f5f5f8;
+      color: #1a1a1a;
+    }
+
+    body.light-mode::before {
+      background-image: radial-gradient(circle, rgba(107, 138, 255, 0.15) 1.5px, transparent 1.5px);
+    }
+
+    body.light-mode::after {
+      background: radial-gradient(ellipse at 30% 40%, rgba(107, 138, 255, 0.08) 0%, transparent 55%);
+    }
+
+    body.light-mode header {
+      background: rgba(245, 245, 248, 0.95);
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    }
+
+    body.light-mode nav a,
+    body.light-mode .mode-toggle {
+      color: #666666;
+    }
+
+    body.light-mode nav a:hover,
+    body.light-mode nav a.active,
+    body.light-mode .mode-toggle:hover,
+    body.light-mode .logo {
+      color: #1a1a1a;
+    }
+
+    body.light-mode .nav-cta {
+      background: #1a1a1a;
+      color: white !important;
+    }
+
+    body.light-mode .hero-section h1 {
+      background: linear-gradient(135deg, #1a1a1a 0%, #444444 100%);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    body.light-mode .hero-section p,
+    body.light-mode .section-subtitle,
+    body.light-mode .feature-card p,
+    body.light-mode .feature-card li,
+    body.light-mode .plain-panel p,
+    body.light-mode .flow-card p,
+    body.light-mode .commitment p,
+    body.light-mode .reddit-box p {
+      color: #555555;
+    }
+
+    body.light-mode .section-title,
+    body.light-mode .feature-card h3,
+    body.light-mode .plain-panel h2,
+    body.light-mode .flow-card h3,
+    body.light-mode .commitment h3,
+    body.light-mode .reddit-box h2 {
+      color: #1a1a1a;
+    }
+
+    body.light-mode .feature-card,
+    body.light-mode .flow-card,
+    body.light-mode .commitment {
+      background: rgba(255, 255, 255, 0.7);
+      border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    body.light-mode .feature-card:hover {
+      background: rgba(255, 255, 255, 0.9);
+      border-color: rgba(107, 138, 255, 0.3);
+      box-shadow: 0 20px 40px rgba(107, 138, 255, 0.1);
+    }
+
+    body.light-mode .plain-panel {
+      background: rgba(0, 180, 216, 0.04);
+      border-color: rgba(0, 180, 216, 0.12);
+    }
+
+    body.light-mode .reddit-box {
+      background: linear-gradient(135deg, rgba(107, 138, 255, 0.08) 0%, rgba(0, 180, 216, 0.04) 100%);
+      border-color: rgba(107, 138, 255, 0.15);
+    }
+
+    body.light-mode .scope-list span {
+      color: #555555;
+      border-color: rgba(0,0,0,0.08);
+      background: rgba(0,0,0,0.025);
+    }
+
+
+    body.light-mode .trust-pill,
+    body.light-mode .repo-card,
+    body.light-mode .mini-card {
+      background: rgba(255, 255, 255, 0.72);
+      border-color: rgba(0, 0, 0, 0.08);
+    }
+
+    body.light-mode .trust-pill {
+      color: #334155;
+    }
+
+    body.light-mode .repo-card h3,
+    body.light-mode .mini-card strong,
+    body.light-mode .warning-panel h2 {
+      color: #1a1a1a;
+    }
+
+    body.light-mode .repo-card p,
+    body.light-mode .mini-card p {
+      color: #555555;
+    }
+
+    body.light-mode .secondary-button {
+      color: #24324f;
+      background: rgba(0,0,0,0.035);
+      border-color: rgba(0,0,0,0.08);
+    }
+
+    body.light-mode .warning-panel {
+      background: rgba(244, 196, 48, 0.08);
+      border-color: rgba(168, 120, 0, 0.16);
+    }
+
+    body.light-mode .warning-panel p {
+      color: #6f5a1d;
+    }
+
+    body.light-mode .link-list a {
+      color: #06677a;
+      background: rgba(0, 180, 216, 0.055);
+      border-color: rgba(0, 100, 130, 0.14);
+    }
+
+    body.light-mode footer {
+      border-color: rgba(0, 0, 0, 0.08);
+      color: #999999;
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+
+    @media (max-width: 1100px) {
+      .feature-grid,
+      .feature-grid.two,
+      .flow-grid,
+      .commitment-list {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      header {
+        padding: 20px 32px;
+      }
+
+      nav a {
+        margin-left: 16px;
+      }
+
+      .hero-section {
+        padding: 72px 32px 54px;
+      }
+
+      .hero-section h1 {
+        font-size: 42px;
+      }
+
+      .hero-section p {
+        font-size: 16px;
+      }
+
+      .section {
+        padding: 56px 32px;
+      }
+
+      .section-title {
+        font-size: 34px;
+      }
+
+      .feature-grid,
+      .feature-grid.two,
+      .flow-grid,
+      .commitment-list {
+        grid-template-columns: 1fr;
+      }
+
+      .feature-card,
+      .plain-panel,
+      .reddit-box {
+        padding: 28px;
+      }
+
+      footer {
+        padding: 46px 24px;
+      }
+    }
+  </style>
+  <link rel="icon" type="image/png" href="/favicon.png">
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-V431CY30BX"></script>
+  <script>window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag("js",new Date());gtag("config","G-V431CY30BX");</script>
+</head>
+<body>
+<!-- MMOBASE BUILD transparency-v68-open-source-github-redesign-20260522 -->
+<header>
+    <div class="logo">MMOBASE</div>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="https://v2.mmobase.co.uk/transparency" class="active">Transparency</a>
+      <a href="https://v2.mmobase.co.uk/donations">Donations</a>
+      <div class="user-menu">
+        <a href="#" class="nav-cta" id="authButton" onclick="handleAuthClick(event)">Get Started</a>
+        <div class="user-dropdown" id="userDropdown">
+          <a href="/profile">Profile</a>
+          <a href="/settings">Settings</a>
+          <hr>
+          <a href="#" onclick="handleSignOut(event)">Sign Out</a>
+        </div>
+      </div>
+      <button class="mode-toggle" id="modeToggle" onclick="toggleDarkLight()" title="Toggle light/dark mode"><svg id="modeIcon" viewBox="0 0 24 24"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg></button>
+    </nav>
+  </header>
+
+  <main>
+    <section class="hero-section">
+      <h1>Transparency</h1>
+      <p>
+        MMOBASE uses CCP's official EVE SSO and ESI API. This page gives the plain-English version of what the app can access,
+        what it cannot do, and where the source code can be reviewed.
+      </p>
+      <div class="hero-note">MMOBASE never sees, asks for, or stores your EVE Online password.</div>
+      <div class="trust-row">
+        <div class="trust-pill"><span></span>Frontend open source</div>
+        <div class="trust-pill"><span></span>Backend open source</div>
+        <div class="trust-pill"><span></span>CCP SSO only</div>
+        <div class="trust-pill"><span></span>User-controlled access</div>
+      </div>
+    </section>
+
+    <section class="section alt" id="open-source">
+      <div class="section-inner">
+        <h2 class="section-title">Open source and GitHub</h2>
+        <p class="section-subtitle">
+          The frontend and backend are public so players, developers and security-minded EVE users can inspect how MMOBASE works.
+          This is the main transparency step: you do not have to rely only on this page.
+        </p>
+
+        <div class="repo-grid">
+          <div class="repo-card">
+            <div class="repo-kicker">Frontend</div>
+            <h3>MMOBASE website and dashboard UI</h3>
+            <p>
+              Contains the public site, dashboard pages, screenshots, transparency page, privacy pages and frontend code.
+            </p>
+            <div class="repo-actions">
+              <a class="repo-button" href="https://github.com/MMO-BASE/mmobase" target="_blank" rel="noopener noreferrer">View frontend repo</a>
+            </div>
+          </div>
+
+          <div class="repo-card">
+            <div class="repo-kicker">Backend API</div>
+            <h3>EVE auth, syncing and server logic</h3>
+            <p>
+              Contains the Node.js backend that handles EVE OAuth, ESI requests, character data, wallet/asset processing and API endpoints.
+            </p>
+            <div class="repo-actions">
+              <a class="repo-button" href="https://github.com/MMO-BASE/mmobase-backend" target="_blank" rel="noopener noreferrer">View backend repo</a>
+            </div>
+          </div>
+        </div>
+
+        <div class="plain-panel" style="margin-top: 30px;">
+          <h2>Why this matters</h2>
+          <p>
+            EVE players are right to be careful with third-party tools. Publishing the backend makes it easier for the community to check
+            what data is requested, how SSO tokens are handled, and whether the app is doing what it claims to do.
+          </p>
+          <div class="link-list">
+            <a href="https://github.com/MMO-BASE/mmobase" target="_blank" rel="noopener noreferrer">https://github.com/MMO-BASE/mmobase</a>
+            <a href="https://github.com/MMO-BASE/mmobase-backend" target="_blank" rel="noopener noreferrer">https://github.com/MMO-BASE/mmobase-backend</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="section-inner">
+        <h2 class="section-title">How MMOBASE Handles EVE Login</h2>
+        <p class="section-subtitle">
+          MMOBASE uses CCP login, not your EVE password. You approve specific ESI permissions, MMOBASE receives approved tokens,
+          and those tokens are used to build dashboard views for your linked characters.
+        </p>
+
+        <div class="mini-grid">
+          <div class="mini-card">
+            <strong>No EVE password access</strong>
+            <p>You log in through CCP. Your EVE password never touches MMOBASE.</p>
+          </div>
+          <div class="mini-card">
+            <strong>Approved ESI data only</strong>
+            <p>The app can only request data covered by the permissions you approved.</p>
+          </div>
+          <div class="mini-card">
+            <strong>Dashboard snapshots</strong>
+            <p>Some wallet and asset values are saved so trends can be shown over time.</p>
+          </div>
+          <div class="mini-card">
+            <strong>Access can be revoked</strong>
+            <p>You can remove MMOBASE from CCP authorised applications to stop future ESI access.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="section-inner">
+        <h2 class="section-title">What MMOBASE uses</h2>
+        <p class="section-subtitle">
+          The aim is to use only the data needed for the dashboard features. The exact scope list may change as features are added or cleaned up.
+        </p>
+
+        <div class="feature-grid">
+          <div class="feature-card">
+            <div class="feature-accent"></div>
+            <h3>Character and account overview</h3>
+            <ul>
+              <li>Character name, ID and portrait</li>
+              <li>Corporation/alliance display where available</li>
+              <li>Skill points, queue and progression context</li>
+              <li>Current ship and location when approved</li>
+            </ul>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-accent"></div>
+            <h3>Wallet, market and history</h3>
+            <ul>
+              <li>Wallet balance and wallet journal</li>
+              <li>Transactions where available</li>
+              <li>Market orders where approved</li>
+              <li>Saved wallet snapshots for trend views</li>
+            </ul>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-accent"></div>
+            <h3>Assets and valuation</h3>
+            <ul>
+              <li>Assets, ships and item locations</li>
+              <li>Station/location resolution where possible</li>
+              <li>Estimated item values</li>
+              <li>Saved asset snapshots for dashboard history</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="plain-panel">
+        <h2>How EVE SSO works</h2>
+        <p>
+          MMOBASE does not log into your EVE account. You are sent to CCP, CCP shows the permission prompt, and after approval
+          MMOBASE receives tokens that can read the approved ESI data. If you revoke MMOBASE through CCP account management,
+          future refreshes for that character stop.
+        </p>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="section-inner">
+        <h2 class="section-title">What MMOBASE does not do</h2>
+        <p class="section-subtitle">
+          MMOBASE is a dashboard and tracking tool. It is not designed to control your account or make in-game decisions.
+        </p>
+
+        <div class="feature-grid two">
+          <div class="feature-card">
+            <div class="feature-accent"></div>
+            <h3>Account safety</h3>
+            <ul>
+              <li>Does not see or store your EVE Online password</li>
+              <li>Does not ask you to type your EVE password into MMOBASE</li>
+              <li>Does not control your EVE client</li>
+              <li>Does not sell your character data to advertisers</li>
+            </ul>
+          </div>
+
+          <div class="feature-card">
+            <div class="feature-accent"></div>
+            <h3>In-game safety</h3>
+            <ul>
+              <li>Does not move your ISK</li>
+              <li>Does not move your items</li>
+              <li>Does not sell ships, contracts or market items</li>
+              <li>Does not make in-game decisions for you</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section" id="limitations">
+      <div class="warning-panel">
+        <h2>Current limitations</h2>
+        <p>
+          MMOBASE is still in active development. The main area still being improved is asset valuation accuracy,
+          including cleaner pricing logic, better handling of unusual assets and clearer empty/loading states.
+          Feedback, bug reports, code review and ESI knowledge are welcome through GitHub.
+        </p>
+      </div>
+    </section>
+
+    <section class="section alt">
+      <div class="section-inner">
+        <h2 class="section-title">Revoke access</h2>
+        <p class="section-subtitle">
+          You stay in control of your character connection.
+        </p>
+
+        <div class="flow-grid">
+          <div class="flow-card">
+            <h3>Open CCP account management</h3>
+            <p>Go to your EVE Online account area.</p>
+          </div>
+          <div class="flow-card">
+            <h3>Find authorised apps</h3>
+            <p>Look for third-party or authorised applications.</p>
+          </div>
+          <div class="flow-card">
+            <h3>Remove MMOBASE</h3>
+            <p>Remove access for the character you no longer want linked.</p>
+          </div>
+          <div class="flow-card">
+            <h3>Disconnect locally</h3>
+            <p>Use MMOBASE account tools to remove local linked data when available.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="reddit-box">
+        <h2>For Reddit and security reviewers</h2>
+        <p>
+          Security concerns are welcome. The frontend and backend are public on GitHub, so the most useful feedback is specific:
+          which permission concerns you, what data you think should not be stored, or what wording/code path needs improving.
+        </p>
+        <div class="mono-note">
+          Current focus before wider release: keep RLS locked down, reduce unused scopes, document each dashboard tab clearly,
+          and improve asset valuation accuracy.
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer>
+    <div style="margin-bottom: 18px;">
+      <a href="/">Home</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="https://v2.mmobase.co.uk/transparency">Transparency</a>
+      <a href="https://v2.mmobase.co.uk/donations">Donations</a>
+      <a href="/terms-of-service">Terms</a>
+      <a href="/privacy-policy">Privacy</a>
+    </div>
+    <div>© 2026 MMOBASE. Built for EVE Online pilots.</div>
+  </footer>
+
+  <script>
+    const SUPABASE_URL = 'https://rfswlpozpwcrlnpymbsr.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJyZnN3bHBvenB3Y3JsbnB5bWJzciIsInJvbGUiOiJhbm9uIiwiaWF0IjoxNzY4NTQ5NzE3LCJleHAiOjIwODQxMjU3MTd9._5pxb0WCJ0FBQ0_DA8BJjm5jCA9nxVDBn8IOGRjKnoI';
+    const { createClient } = supabase;
+    const supabaseClient = createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    async function checkUserSession() {
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && session.user) updateUIForSignedInUser(session.user);
+    }
+
+    function updateUIForSignedInUser(user) {
+      const authButton = document.getElementById('authButton');
+      if (!authButton) return;
+      authButton.textContent = 'Hi, ' + (user.user_metadata?.full_name || 'User').split(' ')[0];
+      authButton.onclick = function(e) { toggleDropdown(e); };
+    }
+
+    function toggleDropdown(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      const dropdown = document.getElementById('userDropdown');
+      if (dropdown) dropdown.classList.toggle('show');
+    }
+
+    async function handleAuthClick(e) {
+      e.preventDefault();
+      const { data: { session } } = await supabaseClient.auth.getSession();
+      if (session && session.user) toggleDropdown(e);
+      else window.location.href = '/dashboard';
+    }
+
+    async function handleSignOut(e) {
+      e.preventDefault();
+      const { error } = await supabaseClient.auth.signOut();
+      if (!error) {
+        document.getElementById('authButton').textContent = 'Get Started';
+        document.getElementById('authButton').onclick = function(ev) { handleAuthClick(ev); };
+        const dropdown = document.getElementById('userDropdown');
+        if (dropdown) dropdown.classList.remove('show');
+      }
+    }
+
+    function toggleDarkLight() {
+      const body = document.body;
+      const icon = document.getElementById('modeIcon');
+      body.classList.toggle('light-mode');
+      if (body.classList.contains('light-mode')) {
+        icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+        localStorage.setItem('mmobase-theme', 'light');
+      } else {
+        icon.innerHTML = '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>';
+        localStorage.setItem('mmobase-theme', 'dark');
+      }
+    }
+
+    function initTheme() {
+      const saved = localStorage.getItem('mmobase-theme');
+      if (saved === 'light') {
+        document.body.classList.add('light-mode');
+        const icon = document.getElementById('modeIcon');
+        if (icon) icon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/>';
+      }
+    }
+
+    document.addEventListener('click', function(e) {
+      const userDropdown = document.getElementById('userDropdown');
+      const userMenu = document.querySelector('.user-menu');
+      if (userDropdown && userMenu && !userMenu.contains(e.target)) userDropdown.classList.remove('show');
+    });
+
+    window.addEventListener('DOMContentLoaded', checkUserSession);
+    initTheme();
+  </script>
+
+  <script>
+    // v64 safe nav fix: one-shot repair only, no continuous watcher, no interval loop.
+    (function(){
+      function addTransparencyLinkOnce() {
+        var navs = document.querySelectorAll('header nav');
+        for (var i = 0; i < navs.length; i++) {
+          var nav = navs[i];
+          var links = Array.prototype.slice.call(nav.querySelectorAll('a'));
+
+          var donations = links.find(function(a) {
+            var href = a.getAttribute('href') || '';
+            return href === 'donations' || href === '/donations' || href === 'donations.html' || href === '/donations.html';
+          });
+
+          if (!donations) continue;
+
+          var transparency = links.find(function(a) {
+            var href = a.getAttribute('href') || '';
+            return href === 'transparency' || href === '/transparency' || href === 'transparency.html' || href === '/transparency.html';
+          });
+
+          if (!transparency) {
+            transparency = document.createElement('a');
+            transparency.href = 'transparency';
+            transparency.textContent = 'Transparency';
+          } else {
+            transparency.textContent = 'Transparency';
+          }
+
+          if (transparency.nextElementSibling !== donations) {
+            nav.insertBefore(transparency, donations);
+          }
+        }
+      }
+
+      window.addTransparencyLinkOnce = addTransparencyLinkOnce;
+
+      if (document.readyState === 'loading') {
+        document.addEventListener('DOMContentLoaded', addTransparencyLinkOnce);
+      } else {
+        addTransparencyLinkOnce();
+      }
+
+      window.addEventListener('load', function() {
+        addTransparencyLinkOnce();
+        setTimeout(addTransparencyLinkOnce, 300);
+        setTimeout(addTransparencyLinkOnce, 1200);
+        setTimeout(addTransparencyLinkOnce, 2500);
+      });
+    })();
+  </script>
+
+</body>
+</html>
