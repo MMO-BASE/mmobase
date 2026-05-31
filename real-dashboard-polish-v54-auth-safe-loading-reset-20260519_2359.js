@@ -172,26 +172,88 @@ async function initDashboard() {
   buildCharacterSwitcher();
 
   // Load primary character
-  var primary = linkedCharacters.find(function(c) { return c.is_primary; }) || linkedCharacters[0];
+  var primary = getPreferredCharacter();
+
+  if (characterNeedsRelink(primary)) {
+    showToast('Your linked EVE character needs re-linking. Redirecting to settings...', 'error');
+    setTimeout(function() { window.location.href = '/settings'; }, 1500);
+    return;
+  }
+
   loadCharacterData(primary.character_id);
   loadJitaPrices();
 }
 
 // Build the character switcher dropdown
+
+function safeHtml(value) {
+  return String(value == null ? "" : value)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#39;");
+}
+
+function characterNeedsRelink(ch) {
+  return !!(ch && (ch.needs_relink === true || ch.token_status === "needs_relink"));
+}
+
+function getPreferredCharacter() {
+  return linkedCharacters.find(function(c) {
+    return !characterNeedsRelink(c) && c.is_primary;
+  }) || linkedCharacters.find(function(c) {
+    return !characterNeedsRelink(c);
+  }) || linkedCharacters[0];
+}
+
+async function relinkEveCharacter(event) {
+  if (event) {
+    event.preventDefault();
+    event.stopPropagation();
+  }
+
+  try {
+    var sessionResult = await supabaseClient.auth.getSession();
+    var session = sessionResult && sessionResult.data ? sessionResult.data.session : null;
+
+    if (!session) {
+      window.location.href = "/settings";
+      return;
+    }
+
+    window.location.href = "/auth/eve?token=" + encodeURIComponent(session.access_token) + "&from=settings";
+  } catch (e) {
+    window.location.href = "/settings";
+  }
+}
+
+
 function buildCharacterSwitcher() {
   var switcher = document.querySelector('.char-switcher-btn');
   var dropdown = document.getElementById('charDropdown');
 
   if (!switcher || !dropdown) return;
 
-  var primary = linkedCharacters.find(function(c) { return c.is_primary; }) || linkedCharacters[0];
-  switcher.innerHTML = primary.character_name + ' <svg viewBox="0 0 10 10" style="width:10px;height:10px;fill:currentColor"><path d="M1 3 L5 7 L9 3 Z"/></svg>';
+  var primary = getPreferredCharacter();
+  if (!primary) return;
+  switcher.innerHTML = safeHtml(primary.character_name) + ' <svg viewBox="0 0 10 10" style="width:10px;height:10px;fill:currentColor"><path d="M1 3 L5 7 L9 3 Z"/></svg>';
 
   var html = '<div class="char-dropdown-label">Your Characters</div>';
   linkedCharacters.forEach(function(ch, i) {
-    html += '<a class="char-item' + (i === 0 ? ' active' : '') + '" onclick="switchToCharacter(' + ch.character_id + ', this, event)">';
-    html += '<span class="char-item-dot"></span>';
-    html += '<span>' + ch.character_name + '</span>';
+    var needsRelink = characterNeedsRelink(ch);
+    var isActive = primary && ch.character_id === primary.character_id;
+    var clickAction = needsRelink ? 'relinkEveCharacter(event)' : 'switchToCharacter(' + ch.character_id + ', this, event)';
+
+    html += '<a class="char-item' + (isActive ? ' active' : '') + (needsRelink ? ' needs-relink' : '') + '" onclick="' + clickAction + '">';
+    html += '<span class="char-item-dot" style="' + (needsRelink ? 'background:#f59e0b;' : '') + '"></span>';
+    html += '<span>' + safeHtml(ch.character_name);
+
+    if (needsRelink) {
+      html += ' <em style="margin-left:8px;color:#f59e0b;font-style:normal;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;">Needs re-link</em>';
+    }
+
+    html += '</span>';
     html += '</a>';
   });
   html += '<hr>';
@@ -209,6 +271,13 @@ function switchToCharacter(characterId, el, event) {
   event.stopPropagation();
 
   var ch = linkedCharacters.find(function(c) { return c.character_id === characterId; });
+
+  if (characterNeedsRelink(ch)) {
+    showToast('This character needs re-linking with EVE.', 'error');
+    relinkEveCharacter(event);
+    return;
+  }
+
   if (ch) {
     document.querySelector('.char-switcher-btn').innerHTML = ch.character_name + ' <svg viewBox="0 0 10 10" style="width:10px;height:10px;fill:currentColor"><path d="M1 3 L5 7 L9 3 Z"/></svg>';
   }

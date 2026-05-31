@@ -534,14 +534,14 @@
     <div class="logo">MMOBASE</div>
     <nav>
       <a href="/">Home</a>
-      <a href="dashboard">Dashboard</a>
-      <a href="transparency">Transparency</a>
-      <a href="donations">Donations</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="https://v2.mmobase.co.uk/transparency">Transparency</a>
+      <a href="https://v2.mmobase.co.uk/donations">Donations</a>
       <div class="user-menu">
         <a href="#" class="nav-cta" id="authButton" onclick="handleAuthClick(event)">Get Started</a>
         <div class="user-dropdown" id="userDropdown">
-          <a href="profile.html">Profile</a>
-          <a href="settings.html">Settings</a>
+          <a href="/profile">Profile</a>
+          <a href="/settings">Settings</a>
           <hr>
           <a href="#" onclick="handleSignOut(event)">Sign Out</a>
         </div>
@@ -556,8 +556,8 @@
         Track assets, industry projects, and net worth across all characters.
       </p>
       <div class="hero-buttons">
-        <a href="demo" class="btn-primary">View Dashboard Demo</a>
-        <a href="learn-more" class="btn-secondary">Learn More</a>
+        <a href="/demo" class="btn-primary">View Dashboard Demo</a>
+        <a href="/learn-more" class="btn-secondary">Learn More</a>
       </div>
     </div>
   </section>
@@ -609,7 +609,7 @@
       </form>
 
       <div class="auth-footer">
-        By continuing, you agree to our <a href="terms-of-service">Terms</a> and <a href="privacy-policy">Privacy Policy</a>
+        By continuing, you agree to our <a href="/terms-of-service">Terms</a> and <a href="/privacy-policy">Privacy Policy</a>
       </div>
     </div>
   </div>
@@ -796,7 +796,7 @@
       }
       try {
         const { error } = await supabaseClient.auth.resetPasswordForEmail(email.value, {
-          redirectTo: 'https://mmobase.co.uk'
+          redirectTo: 'https://v2.mmobase.co.uk'
         });
         if (error) throw error;
         showToast('Password reset email sent. Check your inbox.', 'success');

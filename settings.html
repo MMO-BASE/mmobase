@@ -545,6 +545,239 @@
     }
       @media (max-height: 800px) { body { zoom: 0.84; } }
     @media (max-height: 700px) { body { zoom: 0.78; } }
+
+    /* DELETE ACCOUNT MODAL */
+    .delete-modal-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      background: rgba(3, 8, 20, 0.78);
+      backdrop-filter: blur(10px);
+      z-index: 100000;
+    }
+    .delete-modal-overlay.active {
+      display: flex;
+      animation: deleteModalFade 0.18s ease;
+    }
+    .delete-modal {
+      width: 100%;
+      max-width: 540px;
+      background: linear-gradient(180deg, rgba(13, 19, 33, 0.98), rgba(8, 13, 24, 0.98));
+      border: 1px solid rgba(248, 113, 113, 0.22);
+      border-radius: 18px;
+      box-shadow: 0 28px 80px rgba(0, 0, 0, 0.52);
+      overflow: hidden;
+      transform: translateY(0);
+    }
+    .delete-modal-top {
+      padding: 22px 24px 18px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 18px;
+    }
+    .delete-modal-kicker {
+      font-size: 10px;
+      font-weight: 800;
+      text-transform: uppercase;
+      letter-spacing: 1.1px;
+      color: #f87171;
+      margin-bottom: 8px;
+    }
+    .delete-modal-title {
+      margin: 0;
+      font-size: 22px;
+      line-height: 1.2;
+      font-weight: 800;
+      color: #ffffff;
+    }
+    .delete-modal-close {
+      width: 34px;
+      height: 34px;
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 10px;
+      background: rgba(255, 255, 255, 0.03);
+      color: #8892a6;
+      font-size: 24px;
+      line-height: 1;
+      cursor: pointer;
+      transition: all 0.18s ease;
+      flex-shrink: 0;
+    }
+    .delete-modal-close:hover {
+      color: #ffffff;
+      border-color: rgba(255, 255, 255, 0.16);
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .delete-modal-body {
+      padding: 22px 24px 10px;
+    }
+    .delete-modal-body p {
+      color: #a7b1c7;
+      font-size: 14px;
+      line-height: 1.65;
+      margin: 0 0 14px;
+    }
+    .delete-modal-danger-copy {
+      color: #ffffff !important;
+      font-weight: 600;
+    }
+    .delete-modal-list {
+      margin: 0 0 16px;
+      padding: 14px 16px;
+      list-style: none;
+      background: rgba(248, 113, 113, 0.055);
+      border: 1px solid rgba(248, 113, 113, 0.14);
+      border-radius: 12px;
+    }
+    .delete-modal-list li {
+      color: #c8d1e3;
+      font-size: 13px;
+      line-height: 1.7;
+      display: flex;
+      gap: 9px;
+      align-items: flex-start;
+    }
+    .delete-modal-list li::before {
+      content: "•";
+      color: #f87171;
+      font-weight: 900;
+    }
+    .delete-modal-confirm-label {
+      display: block;
+      color: #dbe4ff;
+      font-size: 13px;
+      font-weight: 700;
+      margin: 16px 0 8px;
+    }
+    .delete-modal-confirm-label strong {
+      color: #f87171;
+      letter-spacing: 0.4px;
+    }
+    .delete-modal-input {
+      width: 100%;
+      padding: 12px 14px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 12px;
+      background: rgba(255, 255, 255, 0.04);
+      color: #ffffff;
+      font-size: 14px;
+      outline: none;
+      transition: all 0.18s ease;
+    }
+    .delete-modal-input:focus {
+      border-color: rgba(248, 113, 113, 0.5);
+      box-shadow: 0 0 0 3px rgba(248, 113, 113, 0.1);
+    }
+    .delete-modal-status {
+      min-height: 20px;
+      margin-top: 10px;
+      color: #f87171;
+      font-size: 13px;
+      line-height: 1.45;
+    }
+    .delete-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 18px 24px 24px;
+    }
+    .delete-modal-cancel,
+    .delete-modal-confirm {
+      padding: 11px 18px;
+      border-radius: 12px;
+      border: 0;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+    .delete-modal-cancel {
+      background: transparent;
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+    .delete-modal-cancel:hover {
+      background: rgba(255, 255, 255, 0.05);
+      color: #ffffff;
+    }
+    .delete-modal-confirm {
+      background: linear-gradient(180deg, #ef4444, #dc2626);
+      color: #ffffff;
+      box-shadow: 0 12px 28px rgba(220, 38, 38, 0.25);
+    }
+    .delete-modal-confirm:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 14px 32px rgba(220, 38, 38, 0.34);
+    }
+    .delete-modal-confirm:disabled {
+      opacity: 0.55;
+      cursor: not-allowed;
+      transform: none;
+      box-shadow: none;
+    }
+    body.light-mode .delete-modal-overlay {
+      background: rgba(15, 23, 42, 0.42);
+    }
+    body.light-mode .delete-modal {
+      background: rgba(255, 255, 255, 0.98);
+      border-color: rgba(185, 28, 28, 0.2);
+      box-shadow: 0 28px 80px rgba(15, 23, 42, 0.22);
+    }
+    body.light-mode .delete-modal-top {
+      border-bottom-color: rgba(0, 0, 0, 0.06);
+    }
+    body.light-mode .delete-modal-title {
+      color: #1a1a1a;
+    }
+    body.light-mode .delete-modal-close {
+      color: #666;
+      border-color: rgba(0, 0, 0, 0.08);
+      background: rgba(0, 0, 0, 0.03);
+    }
+    body.light-mode .delete-modal-close:hover {
+      color: #1a1a1a;
+      background: rgba(0, 0, 0, 0.05);
+    }
+    body.light-mode .delete-modal-body p {
+      color: #555;
+    }
+    body.light-mode .delete-modal-danger-copy {
+      color: #1a1a1a !important;
+    }
+    body.light-mode .delete-modal-list {
+      background: rgba(248, 113, 113, 0.06);
+      border-color: rgba(185, 28, 28, 0.14);
+    }
+    body.light-mode .delete-modal-list li {
+      color: #444;
+    }
+    body.light-mode .delete-modal-confirm-label {
+      color: #333;
+    }
+    body.light-mode .delete-modal-input {
+      background: rgba(0, 0, 0, 0.03);
+      border-color: rgba(0, 0, 0, 0.1);
+      color: #1a1a1a;
+    }
+    @keyframes deleteModalFade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+    @media (max-width: 560px) {
+      .delete-modal-actions {
+        flex-direction: column-reverse;
+      }
+      .delete-modal-cancel,
+      .delete-modal-confirm {
+        width: 100%;
+      }
+    }
+
     </style>
   <link rel="icon" type="image/png" href="/favicon.png">
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-V431CY30BX"></script>
@@ -556,14 +789,14 @@
     <div class="logo">MMOBASE</div>
     <nav>
       <a href="/">Home</a>
-      <a href="dashboard">Dashboard</a>
-      <a href="transparency">Transparency</a>
-      <a href="donations">Donations</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="https://v2.mmobase.co.uk/transparency">Transparency</a>
+      <a href="https://v2.mmobase.co.uk/donations">Donations</a>
       <div class="user-menu">
         <a href="#" class="nav-cta" id="authButton" onclick="handleAuthClick(event)">Get Started</a>
         <div class="user-dropdown" id="userDropdown">
-          <a href="profile.html">Profile</a>
-          <a href="settings.html">Settings</a>
+          <a href="/profile">Profile</a>
+          <a href="/settings">Settings</a>
           <hr>
           <a href="#" onclick="handleSignOut(event)">Sign Out</a>
         </div>
@@ -648,7 +881,7 @@
         <div style="margin-top:48px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.06);">
           <h1 style="font-size:18px;color:#f87171;margin-bottom:6px;">Danger Zone</h1>
           <p class="section-desc">Permanently delete your MMOBASE account and all associated data</p>
-          <button class="btn-danger" onclick="showToast('Please contact us via Discord to delete your account.', 'info')">Delete Account</button>
+          <button class="btn-danger" onclick="openDeleteAccountModal(event)">Delete Account</button>
         </div>
       </div>
 
@@ -793,8 +1026,8 @@
 
   <footer>
     <p>&copy; 2026 MMOBASE. All rights reserved. |
-      <a href="terms-of-service">Terms of Service</a> |
-      <a href="privacy-policy">Privacy Policy</a>
+      <a href="/terms-of-service">Terms of Service</a> |
+      <a href="/privacy-policy">Privacy Policy</a>
     </p>
   </footer>
 
@@ -859,7 +1092,61 @@
   <script>
     // SETTINGS PAGE LOGIC
 
-    async function removeCharacter(charId){if(!confirm("Remove this character?")){return}try{var s=await supabaseClient.auth.getSession();if(!s["data"]["session"])return;await supabaseClient.from("eve_tokens").delete().eq("character_id",charId);await supabaseClient.from("eve_characters").delete().eq("character_id",charId);showToast("Character removed.","success");loadLinkedCharacters()}catch(e){showToast("Failed to remove character.","error")}}
+    
+    var pendingRemoveCharacterId = null;
+
+    function removeCharacter(charId) {
+      pendingRemoveCharacterId = charId;
+
+      var modal = document.getElementById('removeCharacterModal');
+      var status = document.getElementById('removeCharacterStatus');
+
+      if (status) status.textContent = '';
+      if (modal) modal.classList.add('active');
+    }
+
+    function closeRemoveCharacterModal() {
+      pendingRemoveCharacterId = null;
+
+      var modal = document.getElementById('removeCharacterModal');
+      var status = document.getElementById('removeCharacterStatus');
+
+      if (modal) modal.classList.remove('active');
+      if (status) status.textContent = '';
+    }
+
+    async function confirmRemoveCharacter() {
+      if (!pendingRemoveCharacterId) return;
+
+      var status = document.getElementById('removeCharacterStatus');
+      var confirmBtn = document.getElementById('removeCharacterConfirmBtn');
+
+      try {
+        if (status) status.textContent = 'Removing character...';
+        if (confirmBtn) confirmBtn.disabled = true;
+
+        var s = await supabaseClient.auth.getSession();
+
+        if (!s["data"]["session"]) {
+          if (status) status.textContent = 'You need to be signed in.';
+          return;
+        }
+
+        await supabaseClient.from("eve_tokens").delete().eq("character_id", pendingRemoveCharacterId);
+        await supabaseClient.from("eve_characters").delete().eq("character_id", pendingRemoveCharacterId);
+
+        closeRemoveCharacterModal();
+        showToast("Character removed.", "success");
+        loadLinkedCharacters();
+      } catch(e) {
+        console.error(e);
+        if (status) status.textContent = 'Failed to remove character.';
+        showToast("Failed to remove character.", "error");
+      } finally {
+        if (confirmBtn) confirmBtn.disabled = false;
+      }
+    }
+
     function connectEve(){supabaseClient.auth.getSession().then(function(r){var s=r["data"]["session"];if(s){window.location.href="/auth/eve?token="+s.access_token+"&from=settings"}else{window.location.href="/dashboard"}})}
     function toggleGameDropdown(game) {
       var dropdown = document.getElementById(game + '-dropdown');
@@ -904,7 +1191,93 @@
       var toggle = document.getElementById('accountUpdatesToggle');
       if (toggle && saved === 'off') { toggle.checked = false; }
     })();
-    async function loadLinkedCharacters(){try{var s=await supabaseClient.auth.getSession();if(!s["data"]["session"])return;var t=s["data"]["session"].access_token;var r=await fetch("/api/characters",{headers:{Authorization:"Bearer "+t}});var d=await r.json();var c=document.getElementById("eve-characters");var st=document.getElementById("eve-status");if(d.characters&&d.characters.length>0){st.textContent=d.characters.length+" character"+(d.characters.length>1?"s":"")+" linked";st.classList.add("connected");var h="";d.characters.forEach(function(ch){h+="<div style=\"display:flex;align-items:center;justify-content:space-between;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)\"><div style=\"display:flex;align-items:center;gap:10px\"><img src=\""+ch.portrait_url+"\" style=\"width:32px;height:32px;border-radius:6px\"><div><div style=\"font-size:13px;font-weight:600\">"+ch.character_name+"</div><div style=\"font-size:11px;color:#666\">"+ch.corporation_name+(ch.alliance_name?" / "+ch.alliance_name:"")+"</div></div></div><button onclick=\"removeCharacter("+ch.character_id+")\" style=\"padding:4px 10px;background:transparent;color:#f87171;border:1px solid rgba(239,68,68,0.2);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer\">Remove</button></div>"});c.innerHTML=h}else{st.textContent="Not connected";st.classList.remove("connected");c.innerHTML="<p style=\"font-size:13px;color:#666;padding:8px 0\">No characters linked yet</p>"}}catch(e){console.error(e)}}
+    function settingsSafeHtml(value) {
+      return String(value == null ? "" : value)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    async function relinkEveCharacter(event) {
+      if (event) {
+        event.preventDefault();
+        event.stopPropagation();
+      }
+
+      try {
+        var s = await supabaseClient.auth.getSession();
+        var session = s && s.data ? s.data.session : null;
+
+        if (!session) {
+          showToast("Please sign in first.", "error");
+          return;
+        }
+
+        window.location.href = "/auth/eve?token=" + encodeURIComponent(session.access_token) + "&from=settings";
+      } catch (e) {
+        showToast("Could not start EVE re-link. Please try again.", "error");
+      }
+    }
+
+    async function loadLinkedCharacters() {
+      try {
+        var s = await supabaseClient.auth.getSession();
+        if (!s["data"]["session"]) return;
+
+        var t = s["data"]["session"].access_token;
+        var r = await fetch("/api/characters", { headers: { Authorization: "Bearer " + t } });
+        var d = await r.json();
+        var c = document.getElementById("eve-characters");
+        var st = document.getElementById("eve-status");
+
+        if (d.characters && d.characters.length > 0) {
+          var relinkCount = d.characters.filter(function(ch) {
+            return ch.needs_relink === true || ch.token_status === "needs_relink";
+          }).length;
+
+          st.textContent = d.characters.length + " character" + (d.characters.length > 1 ? "s" : "") + " linked" + (relinkCount ? " - " + relinkCount + " needs re-link" : "");
+          st.classList.add("connected");
+
+          var h = "";
+
+          d.characters.forEach(function(ch) {
+            var needsRelink = ch.needs_relink === true || ch.token_status === "needs_relink";
+
+            h += "<div style=\"display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid rgba(255,255,255,0.04)\">";
+            h += "<div style=\"display:flex;align-items:center;gap:10px;min-width:0\">";
+            h += "<img src=\"" + settingsSafeHtml(ch.portrait_url || "") + "\" style=\"width:32px;height:32px;border-radius:6px\">";
+            h += "<div style=\"min-width:0\">";
+            h += "<div style=\"font-size:13px;font-weight:600\">" + settingsSafeHtml(ch.character_name || "Unknown character");
+
+            if (needsRelink) {
+              h += " <span style=\"display:inline-block;margin-left:8px;padding:2px 6px;border-radius:999px;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);color:#f59e0b;font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.04em;\">Needs re-link</span>";
+            }
+
+            h += "</div>";
+            h += "<div style=\"font-size:11px;color:#666\">" + settingsSafeHtml(ch.corporation_name || "Unknown corporation") + (ch.alliance_name ? " / " + settingsSafeHtml(ch.alliance_name) : "") + "</div>";
+            h += "</div></div>";
+            h += "<div style=\"display:flex;align-items:center;gap:8px;flex-shrink:0\">";
+
+            if (needsRelink) {
+              h += "<button onclick=\"relinkEveCharacter(event)\" style=\"padding:4px 10px;background:rgba(245,158,11,0.12);color:#f59e0b;border:1px solid rgba(245,158,11,0.35);border-radius:6px;font-size:11px;font-weight:700;cursor:pointer\">Re-link</button>";
+            }
+
+            h += "<button onclick=\"removeCharacter(" + ch.character_id + ")\" style=\"padding:4px 10px;background:transparent;color:#f87171;border:1px solid rgba(239,68,68,0.2);border-radius:6px;font-size:11px;font-weight:600;cursor:pointer\">Remove</button>";
+            h += "</div></div>";
+          });
+
+          c.innerHTML = h;
+        } else {
+          st.textContent = "Not connected";
+          st.classList.remove("connected");
+          c.innerHTML = "<p style=\"font-size:13px;color:#666;padding:8px 0\">No characters linked yet</p>";
+        }
+      } catch (e) {
+        console.error(e);
+      }
+    }
     function switchSection(name, el) {
       document.querySelectorAll('.settings-section').forEach(s => s.classList.remove('active'));
       document.querySelectorAll('.sidebar-item').forEach(s => s.classList.remove('active'));
@@ -1018,7 +1391,7 @@
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) { showToast('You must be logged in.', 'error'); return; }
         const { error } = await supabaseClient.auth.resetPasswordForEmail(session.user.email, {
-          redirectTo: 'https://mmobase.co.uk/settings'
+          redirectTo: 'https://v2.mmobase.co.uk/settings'
         });
         if (error) throw error;
         showToast('Password reset email sent. Check your inbox.', 'success');
@@ -1082,6 +1455,371 @@
       });
     })();
   </script>
+
+
+
+  <!-- DELETE ACCOUNT MODAL -->
+  <div class="delete-modal-overlay" id="deleteAccountModal" onclick="closeDeleteAccountModalOnOverlay(event)" aria-hidden="true">
+    <div class="delete-modal" role="dialog" aria-modal="true" aria-labelledby="deleteAccountTitle" onclick="event.stopPropagation()">
+      <div class="delete-modal-top">
+        <div>
+          <div class="delete-modal-kicker">Danger zone</div>
+          <h2 class="delete-modal-title" id="deleteAccountTitle">Delete MMOBASE account?</h2>
+        </div>
+        <button class="delete-modal-close" type="button" onclick="closeDeleteAccountModal()" aria-label="Close delete account modal">&times;</button>
+      </div>
+
+      <div class="delete-modal-body">
+        <p class="delete-modal-danger-copy">
+          This will permanently delete your MMOBASE account and associated MMOBASE data.
+        </p>
+        <p>
+          Before continuing, please make sure you understand what will be removed.
+        </p>
+
+        <ul class="delete-modal-list">
+          <li>Linked EVE characters</li>
+          <li>Stored EVE access and refresh tokens</li>
+          <li>Profile information</li>
+          <li>Stored dashboard snapshots and account-related data</li>
+        </ul>
+
+        <p>
+          This action cannot be undone. To confirm, type <strong>DELETE</strong> below.
+        </p>
+
+        <label class="delete-modal-confirm-label" for="deleteConfirmInput">Confirmation word: <strong>DELETE</strong></label>
+        <input class="delete-modal-input" id="deleteConfirmInput" type="text" autocomplete="off" placeholder="Type DELETE to continue">
+
+        <div class="delete-modal-status" id="deleteAccountStatus" aria-live="polite"></div>
+      </div>
+
+      <div class="delete-modal-actions">
+        <button class="delete-modal-cancel" type="button" onclick="closeDeleteAccountModal()">Cancel</button>
+        <button class="delete-modal-confirm" id="deleteConfirmButton" type="button" onclick="confirmDeleteAccount()">Delete Account</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    function openDeleteAccountModal(event) {
+      if (event) event.preventDefault();
+
+      var modal = document.getElementById('deleteAccountModal');
+      var input = document.getElementById('deleteConfirmInput');
+      var status = document.getElementById('deleteAccountStatus');
+      var button = document.getElementById('deleteConfirmButton');
+
+      if (status) status.textContent = '';
+      if (input) input.value = '';
+      if (button) {
+        button.disabled = false;
+        button.textContent = 'Delete Account';
+      }
+
+      if (modal) {
+        modal.classList.add('active');
+        modal.setAttribute('aria-hidden', 'false');
+      }
+
+      setTimeout(function() {
+        if (input) input.focus();
+      }, 60);
+    }
+
+    function closeDeleteAccountModal() {
+      var modal = document.getElementById('deleteAccountModal');
+      var input = document.getElementById('deleteConfirmInput');
+      var status = document.getElementById('deleteAccountStatus');
+      var button = document.getElementById('deleteConfirmButton');
+
+      if (modal) {
+        modal.classList.remove('active');
+        modal.setAttribute('aria-hidden', 'true');
+      }
+      if (input) input.value = '';
+      if (status) status.textContent = '';
+      if (button) {
+        button.disabled = false;
+        button.textContent = 'Delete Account';
+      }
+    }
+
+    function closeDeleteAccountModalOnOverlay(event) {
+      if (event && event.target && event.target.id === 'deleteAccountModal') {
+        closeDeleteAccountModal();
+      }
+    }
+
+    async function confirmDeleteAccount() {
+      var input = document.getElementById('deleteConfirmInput');
+      var status = document.getElementById('deleteAccountStatus');
+      var button = document.getElementById('deleteConfirmButton');
+
+      if (!input || input.value !== 'DELETE') {
+        if (status) status.textContent = 'Type DELETE exactly to confirm account deletion.';
+        return;
+      }
+
+      try {
+        if (button) {
+          button.disabled = true;
+          button.textContent = 'Deleting...';
+        }
+        if (status) status.textContent = 'Deleting your account...';
+
+        const sessionResult = await supabaseClient.auth.getSession();
+        const session = sessionResult && sessionResult.data ? sessionResult.data.session : null;
+
+        if (!session) {
+          if (status) status.textContent = 'You need to be signed in to delete your account.';
+          if (button) {
+            button.disabled = false;
+            button.textContent = 'Delete Account';
+          }
+          return;
+        }
+
+        const response = await fetch('/api/account', {
+          method: 'DELETE',
+          headers: {
+            Authorization: 'Bearer ' + session.access_token
+          }
+        });
+
+        const result = await response.json().catch(function() {
+          return {};
+        });
+
+        if (!response.ok) {
+          if (status) status.textContent = result.error || 'Account deletion failed. Please contact support.';
+          if (button) {
+            button.disabled = false;
+            button.textContent = 'Delete Account';
+          }
+          return;
+        }
+
+        await supabaseClient.auth.signOut();
+        localStorage.clear();
+
+        closeDeleteAccountModal();
+        showToast('Your MMOBASE account has been deleted.', 'success');
+
+        setTimeout(function() {
+          window.location.href = '/';
+        }, 900);
+      } catch (error) {
+        console.error(error);
+        if (status) status.textContent = 'Account deletion failed. Please contact support.';
+        if (button) {
+          button.disabled = false;
+          button.textContent = 'Delete Account';
+        }
+      }
+    }
+
+    document.addEventListener('keydown', function(event) {
+      if (event.key === 'Escape') {
+        closeDeleteAccountModal();
+      }
+    });
+  </script>
+
+
+  <!-- REMOVE CHARACTER MODAL -->
+  <div class="remove-character-modal-overlay" id="removeCharacterModal" onclick="if(event.target===this)closeRemoveCharacterModal()">
+    <div class="remove-character-modal">
+      <div class="remove-character-modal-header">
+        <div>
+          <div class="remove-character-kicker">Linked Account</div>
+          <h3>Remove EVE Character?</h3>
+        </div>
+        <button class="remove-character-close" onclick="closeRemoveCharacterModal()" aria-label="Close">&times;</button>
+      </div>
+
+      <div class="remove-character-modal-body">
+        <p>
+          This will unlink the selected EVE character from your MMOBASE account.
+        </p>
+        <p class="remove-character-note">
+          You can add the character again later through EVE SSO if needed.
+        </p>
+        <div id="removeCharacterStatus" class="remove-character-status"></div>
+      </div>
+
+      <div class="remove-character-modal-actions">
+        <button class="remove-character-cancel" onclick="closeRemoveCharacterModal()">Cancel</button>
+        <button class="remove-character-confirm" id="removeCharacterConfirmBtn" onclick="confirmRemoveCharacter()">Remove Character</button>
+      </div>
+    </div>
+  </div>
+
+  <style>
+    .remove-character-modal-overlay {
+      position: fixed;
+      inset: 0;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 22px;
+      background: rgba(3, 8, 20, 0.72);
+      backdrop-filter: blur(8px);
+      z-index: 12000;
+    }
+
+    .remove-character-modal-overlay.active {
+      display: flex;
+      animation: removeCharacterFade 0.18s ease;
+    }
+
+    .remove-character-modal {
+      width: 100%;
+      max-width: 440px;
+      background: rgba(12, 17, 27, 0.98);
+      border: 1px solid rgba(0, 180, 216, 0.18);
+      border-radius: 18px;
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.45);
+      overflow: hidden;
+    }
+
+    .remove-character-modal-header {
+      display: flex;
+      justify-content: space-between;
+      gap: 18px;
+      align-items: flex-start;
+      padding: 24px 24px 16px;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    }
+
+    .remove-character-kicker {
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #00b4d8;
+      margin-bottom: 8px;
+    }
+
+    .remove-character-modal h3 {
+      font-size: 22px;
+      line-height: 1.2;
+      color: #ffffff;
+      margin: 0;
+    }
+
+    .remove-character-close {
+      background: transparent;
+      border: 0;
+      color: #8892a6;
+      font-size: 28px;
+      line-height: 1;
+      cursor: pointer;
+    }
+
+    .remove-character-close:hover {
+      color: #ffffff;
+    }
+
+    .remove-character-modal-body {
+      padding: 18px 24px 8px;
+    }
+
+    .remove-character-modal-body p {
+      font-size: 14px;
+      line-height: 1.65;
+      color: #a8b3c7;
+      margin: 0 0 12px;
+    }
+
+    .remove-character-note {
+      color: #8892a6 !important;
+      font-size: 13px !important;
+    }
+
+    .remove-character-status {
+      min-height: 20px;
+      margin-top: 8px;
+      font-size: 13px;
+      color: #f87171;
+    }
+
+    .remove-character-modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 10px;
+      padding: 18px 24px 24px;
+    }
+
+    .remove-character-cancel,
+    .remove-character-confirm {
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-size: 13px;
+      font-weight: 800;
+      cursor: pointer;
+      transition: all 0.18s ease;
+    }
+
+    .remove-character-cancel {
+      background: transparent;
+      color: #cbd5e1;
+      border: 1px solid rgba(255, 255, 255, 0.12);
+    }
+
+    .remove-character-cancel:hover {
+      background: rgba(255, 255, 255, 0.04);
+      border-color: rgba(255, 255, 255, 0.22);
+    }
+
+    .remove-character-confirm {
+      background: rgba(248, 113, 113, 0.12);
+      color: #f87171;
+      border: 1px solid rgba(248, 113, 113, 0.35);
+    }
+
+    .remove-character-confirm:hover {
+      background: rgba(248, 113, 113, 0.18);
+      border-color: rgba(248, 113, 113, 0.55);
+    }
+
+    .remove-character-confirm:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    body.light-mode .remove-character-modal {
+      background: rgba(255, 255, 255, 0.98);
+      border-color: rgba(0, 180, 216, 0.18);
+      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.18);
+    }
+
+    body.light-mode .remove-character-modal h3 {
+      color: #1a1a1a;
+    }
+
+    body.light-mode .remove-character-modal-body p {
+      color: #555;
+    }
+
+    body.light-mode .remove-character-close {
+      color: #666;
+    }
+
+    body.light-mode .remove-character-close:hover {
+      color: #1a1a1a;
+    }
+
+    body.light-mode .remove-character-cancel {
+      color: #555;
+      border-color: rgba(0, 0, 0, 0.12);
+    }
+
+    @keyframes removeCharacterFade {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  </style>
 
 </body>
 </html>

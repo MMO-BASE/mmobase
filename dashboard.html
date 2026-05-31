@@ -268,14 +268,14 @@
     <div class="logo">MMOBASE</div>
     <nav>
       <a href="/">Home</a>
-      <a href="dashboard">Dashboard</a>
-      <a href="transparency">Transparency</a>
-      <a href="donations">Donations</a>
+      <a href="/dashboard">Dashboard</a>
+      <a href="https://v2.mmobase.co.uk/transparency">Transparency</a>
+      <a href="https://v2.mmobase.co.uk/donations">Donations</a>
       <div class="user-menu">
         <a href="#" class="nav-cta" id="authButton" onclick="handleAuthClick(event)">Get Started</a>
         <div class="user-dropdown" id="userDropdown">
-          <a href="profile.html">Profile</a>
-          <a href="settings.html">Settings</a>
+          <a href="/profile">Profile</a>
+          <a href="/settings">Settings</a>
           <hr>
           <a href="#" onclick="handleSignOut(event)">Sign Out</a>
         </div>
@@ -290,7 +290,7 @@
       <h1>Log in to access your dashboard</h1>
       <p>Connect your EVE Online account to view your character stats, assets, wallet, market data, and more.</p>
       <a href="#" class="eve-sso-btn" onclick="handleEveLogin(event)">Log in with EVE Online</a>
-      <a href="demo" class="demo-link">or try the demo with sample data</a>
+      <a href="/demo" class="demo-link">or try the demo with sample data</a>
     </div>
   </main>
 
@@ -425,7 +425,7 @@
       }
       try {
         const { error } = await supabaseClient.auth.resetPasswordForEmail(email.value, {
-          redirectTo: 'https://mmobase.co.uk'
+          redirectTo: 'https://v2.mmobase.co.uk'
         });
         if (error) throw error;
         showToast('Password reset email sent. Check your inbox.', 'success');
@@ -460,7 +460,7 @@
         <div style="text-align:right;margin-top:-12px;margin-bottom:16px;"><a href="#" onclick="handleForgotPassword(event)" style="font-size:13px;color:#6b8aff;text-decoration:none;">Forgot password?</a></div>
         <button type="submit" style="width:100%;padding:16px;background:#1a1a1a;color:white;border:none;border-radius:12px;font-size:16px;font-weight:600;cursor:pointer;margin-top:8px;">Sign In</button>
       </form>
-      <div style="text-align:center;margin-top:24px;font-size:14px;color:#666;">By continuing, you agree to our <a href="terms-of-service" style="color:#6b8aff;text-decoration:none;font-weight:600;">Terms</a> and <a href="privacy-policy" style="color:#6b8aff;text-decoration:none;font-weight:600;">Privacy Policy</a></div>
+      <div style="text-align:center;margin-top:24px;font-size:14px;color:#666;">By continuing, you agree to our <a href="/terms-of-service" style="color:#6b8aff;text-decoration:none;font-weight:600;">Terms</a> and <a href="/privacy-policy" style="color:#6b8aff;text-decoration:none;font-weight:600;">Privacy Policy</a></div>
     </div>
   </div>
 
