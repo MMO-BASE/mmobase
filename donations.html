@@ -528,7 +528,7 @@
       var email = document.getElementById('signin-email');
       if (!email || !email.value) { showToast('Please enter your email address first.', 'error'); return; }
       try {
-        const { error } = await supabaseClient.auth.resetPasswordForEmail(email.value, { redirectTo: window.location.origin });
+        const { error } = await supabaseClient.auth.resetPasswordForEmail(email.value, { redirectTo: window.location.origin + '/reset-password' });
         if (error) throw error;
         showToast('Password reset email sent. Check your inbox.', 'success');
       } catch(err) { showToast(err.message, 'error'); }

@@ -1308,7 +1308,7 @@
       }
       try {
         const { error } = await supabaseClient.auth.resetPasswordForEmail(email.value, {
-          redirectTo: window.location.origin
+          redirectTo: window.location.origin + '/reset-password'
         });
         if (error) throw error;
         showToast('Password reset email sent. Check your inbox.', 'success');
