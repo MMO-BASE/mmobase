@@ -1391,7 +1391,7 @@
         const { data: { session } } = await supabaseClient.auth.getSession();
         if (!session) { showToast('You must be logged in.', 'error'); return; }
         const { error } = await supabaseClient.auth.resetPasswordForEmail(session.user.email, {
-          redirectTo: window.location.origin + '/reset-password' + '/reset-password'
+          redirectTo: window.location.origin + '/reset-password'
         });
         if (error) throw error;
         showToast('Password reset email sent. Check your inbox.', 'success');
