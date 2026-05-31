@@ -922,8 +922,8 @@
     <nav>
       <a href="/">Home</a>
       <a href="/dashboard">Dashboard</a>
-      <a href="https://v2.mmobase.co.uk/transparency">Transparency</a>
-      <a href="https://v2.mmobase.co.uk/donations">Donations</a>
+      <a href="/transparency">Transparency</a>
+      <a href="/donations">Donations</a>
       <div class="user-menu">
         <a href="#" class="nav-cta" id="authButton" onclick="handleAuthClick(event)">Get Started</a>
         <div class="user-dropdown" id="userDropdown">
@@ -1308,7 +1308,7 @@
       }
       try {
         const { error } = await supabaseClient.auth.resetPasswordForEmail(email.value, {
-          redirectTo: 'https://v2.mmobase.co.uk'
+          redirectTo: window.location.origin
         });
         if (error) throw error;
         showToast('Password reset email sent. Check your inbox.', 'success');
